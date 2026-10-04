@@ -72,6 +72,44 @@ class UE_Security: ScriptModule
                IsVehicleWithRadio(o);
     }
 
+    //~ ---------------------------------------------------------
+    //~  Валидация ключа плейлиста против ФИЗИЧЕСКОЙ библиотеки
+    //~  сервера (папка Music/Type, Music/CD). Читер не сможет
+    //~  включить то, чего нет на диске. Legacy-имена (Rock/Pop/
+    //~  Classic/Dance) разрешаем — они играют из PBO.
+    //~ ---------------------------------------------------------
+    static ref array<string> LEGACY_PLAYLISTS;
+    bool ValidatePlaylistKey(string key, string dirName, string pid)
+    {
+        if (!LEGACY_PLAYLISTS)
+        {
+            LEGACY_PLAYLISTS = new array<string>;
+            LEGACY_PLAYLISTS.Insert("rock");
+            LEGACY_PLAYLISTS.Insert("pop");
+            LEGACY_PLAYLISTS.Insert("classic");
+            LEGACY_PLAYLISTS.Insert("dance");
+        }
+        // полный ключ библиотеки ("Type/MyMix") или имя папки?
+        string probe = key;
+        if (!(probe.StartsWith("Type/") || probe.StartsWith("CD/")))
+            probe = dirName + "/" + key;
+        else if (probe.SubstringWithLimit(0, probe.IndexOf("/")) != dirName)
+        {
+            LogViolation(pid, "плейлист из чужой категории: " + key);
+            return false;
+        }
+
+        if (UE_MusicLibrary.HasPlaylist(probe)) return true;
+
+        // legacy-ключи PBO допускаются только если библиотека вообще пуста
+        // (иначе админ явно перешёл на внешние папки)
+        string base = probe.SubstringWithLimit(probe.IndexOf("/") + 1, probe.Length()).ToLower();
+        if (UE_MusicLibrary.s_SerPlaylists.Count() == 0 && LEGACY_PLAYLISTS.Find(base) >= 0) return true;
+
+        LogViolation(pid, "несуществующий плейлист: " + key);
+        return false;
+    }
+
     bool IsVehicleWithRadio(Object o)
     {
         Car car = Car.Cast(o);

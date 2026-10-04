@@ -45,8 +45,15 @@ class CfgRemoteExec
             allowed = "true";
             jip = "false";
         };
+        // Внешняя музыкальная библиотека: рассылка манифеста
+        // (плейлисты Music/Type, Music/CD, станции Music/Radio.txt)
+        class F_UE_Library_Manifest
+        {
+            allowed = "true";
+            jip = "false";
+        };
     };
-    classes[] = { "UE_ModulePlayer", "UE_ModuleRadio" };
+    classes[] = { "UE_ModulePlayer", "UE_ModuleRadio", "UE_NetworkHandler" };
 };
 
 class CfgServerProblemDetector

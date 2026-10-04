@@ -22,9 +22,12 @@ class MissionHandlerUnesennye: MissionServer
     override void OnPlayerConnect(PlayerBase player)
     {
         super.OnPlayerConnect(player);
-        // при подключении игрока синхронизируем активные источники
+        // при подключении игрока отправляем манифест внешней музыкальной
+        // библиотеки (<Profile>/Music: Type/, CD/, Radio.txt) и
+        // синхронизируем активные источники
         if (GetGame().IsDedicated())
         {
+            UE_ModulePlayer.RPC_SendManifest(player.GetIdentity());
             auto mgr = UE_AudioManager.Instance();
             for (int i = 0; i < mgr.m_Sources.Count(); i++)
             {

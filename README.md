@@ -53,3 +53,25 @@
 - Замените модели-заглушки (`notepad.p3d`, `magazine_rifle_556.p3d`) на свои `.p3d`.
 
 © Unesennye Team, 2026
+
+## Внешняя музыка без PBO (Music/)
+Музыка кассет/дисков НЕ пакуется в PBO. Сервер читает папку `<Profile>/Music`:
+```
+Music/Type/<плейлист>/track.ogg|mp3|wav   — кассеты
+Music/CD/<плейлист>/track.ogg|mp3|wav    — диски
+Music/Radio.txt                            — станции ("Название = URL")
+Music/<...>/meta.txt                       — name = Отображаемое имя
+```
+Клиенты получают манифест по RPC и докачивают треки с HTTP-зеркала
+(`UE_Config::libraryBaseURL`), кэш — `<Profile>/Music_cache/`.
+Образец структуры: `@UnesennyeServer/Music/`, зеркало: `@UnesennyeServer/tools/serve_music.py`.
+
+## Сборка в PBO
+```
+python build_pbo.py          # через armake2 (рекомендуется для продакшена)
+python build_pbo.py --zip    # zip-фолбэк только для локальных тестов
+```
+Результат в `build_out/`: `@Unesennye/Unesennye.pbo`,
+`@Unesennye/Missions|mpmissions/unesennye.Mission.Enoch.pbo`,
+`@UnesennyeServer/UnesennyeServer.pbo`, внешние `Music/` и `tools/` — не в PBO.
+Для релиза подпишите PBO (`verifySignatures=1`), `.bikey` → `keys/`.
