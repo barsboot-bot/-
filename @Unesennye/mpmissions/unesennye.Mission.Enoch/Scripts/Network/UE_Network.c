@@ -6,30 +6,34 @@
 
 class UE_ModulePlayer: ScriptModule
 {
-    // вызывается на сервере, рассылает всем клиентам команду создания источника
+    // вызывается на сервере, рассылает всем клиентам команду создания источника.
+    // ВАЖНО: весь пакет — в ОДНОМ RPC (Param4), т.к. два последовательных
+    // broadcast пакета могли бы доставляться вразнобой разным клиентам.
     static void RPC_CreateSource(int id, int type, string stationKey, string playlist, vector pos, float vol, float startedAt)
     {
         if (!GetGame().IsDedicated()) return;
-        Param4 p = new Param4<int, int, string, vector>(id, type, stationKey + "|" + playlist, pos);
+        Param4<int, int, string, vector> p = new Param4<int, int, string, vector>(
+            id, type, stationKey + "|" + playlist + "|" + vol + "|" + startedAt, pos);
         GetRPCManager().SendRPC("UE_Network", "OnClientCreateSource", p, true, null);
-        Param2 q = new Param2<float, float>(vol, startedAt);
-        GetRPCManager().SendRPC("UE_Network", "OnClientCreateSourceEx", q, true, null);
     }
 
     //~ --- рассылка манифеста музыкальной библиотеки одному клиенту ---
     static void RPC_SendManifest(PlayerIdentity ident)
     {
         if (!GetGame().IsDedicated()) return;
+        if (!ident) return;
         string m = UE_MusicLibrary.s_Manifest;
-        Param1 begin = new Param1<string>("B:" + UE_MusicLibrary.ManifestChunks() + ":" + UE_MusicLibrary.ManifestChunk(0));
-        GetRPCManager().SendRPC("UE_Network", "OnLibraryManifest", begin, true, ident);
-        for (int i = 1; i < UE_MusicLibrary.ManifestChunks(); i++)
+        int chunks = UE_MusicLibrary.ManifestChunks();
+        if (chunks == 0) return;   // библиотека пуста — нечего слать
+        Param1<string> begin = new Param1<string>("B:" + chunks + ":" + UE_MusicLibrary.ManifestChunk(0));
+        GetRPCManager().SendRPC("UE_Network", "OnLibraryManifest", begin, false, ident);
+        for (int i = 1; i < chunks; i++)
         {
-            Param1 ch = new Param1<string>("C:" + UE_MusicLibrary.ManifestChunk(i));
-            GetRPCManager().SendRPC("UE_Network", "OnLibraryManifest", ch, true, ident);
+            Param1<string> ch = new Param1<string>("C:" + UE_MusicLibrary.ManifestChunk(i));
+            GetRPCManager().SendRPC("UE_Network", "OnLibraryManifest", ch, false, ident);
         }
-        Param1 endp = new Param1<string>("E");
-        GetRPCManager().SendRPC("UE_Network", "OnLibraryManifest", endp, true, ident);
+        Param1<string> endp = new Param1<string>("E");
+        GetRPCManager().SendRPC("UE_Network", "OnLibraryManifest", endp, false, ident);
     }
 
     static void RPC_StopSource(int id)
@@ -53,7 +57,6 @@ class UE_NetworkHandler: ModuleBase
     {
         // клиентские обработчики
         GetRPCManager().AddRPC("UE_Network", "OnClientCreateSource", this, FunccType.serverbc);
-        GetRPCManager().AddRPC("UE_Network", "OnClientCreateSourceEx", this, FunccType.serverbc);
         GetRPCManager().AddRPC("UE_Network", "OnClientStopSource", this, FunccType.serverbc);
         GetRPCManager().AddRPC("UE_Network", "OnClientUpdatePos", this, FunccType.serverbc);
         GetRPCManager().AddRPC("UE_Network", "OnLibraryManifest", this, FunccType.serverown);
@@ -75,10 +78,11 @@ class UE_NetworkHandler: ModuleBase
         array<string> parts = {}; meta.Split("|", parts);
         string stationOrPlaylist = parts.Get(0);
         string extra = parts.Count() > 1 ? parts.Get(1) : "";
+        float vol = parts.Count() > 2 ? parts.Get(2).ToFloat() : 1.0;   // базовая громкость с сервера
 
         UE_LocalSound snd = new UE_LocalSound;
         string file = ResolveSoundFile(type_, stationOrPlaylist, extra);
-        snd.Play(file, pos, 1.0, true);
+        snd.Play(file, pos, vol, true);
         snd.SetId(id);
         UE_AudioManager.ClientSounds().Set(id, snd);
 
@@ -87,22 +91,16 @@ class UE_NetworkHandler: ModuleBase
         st.id = id;
         st.type = type_;
         st.position = pos;
-        st.volume = 1.0;
+        st.volume = vol;
         st.isPlaying = true;
         st.stationKey = stationOrPlaylist;
         st.playlist = extra;
         if (!UE_AudioManager.s_ClientMirror) UE_AudioManager.s_ClientMirror = new map<int, ref UE_PlaybackState>;
         UE_AudioManager.s_ClientMirror.Set(id, st);
-    }
 
-    // второй пакет — громкость/время старта (синхронизация трека)
-    void OnClientCreateSourceEx(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
-    {
-        if (GetGame().IsDedicated()) return;
-        Param2<float, float> data;
-        if (!ctx.Read(data)) return;
-        // базовая громкость и startedAt применяются менеджером при следующем тике
-        UE_AudioManager.Instance().SetLastCreateParams(data.param1, data.param2);
+        // если трек ещё не скачан — докачка асинхронная; после завершения
+        // (OnDownloadFinished) перезапустим звук уже из локального файла
+        UE_DownloadWatcher.Watch(id, type_, stationOrPlaylist, extra, pos, vol);
     }
 
     //~ ---------- КЛИЕНТ: манифест музыкальной библиотеки (чанками) ----------
@@ -148,6 +146,7 @@ class UE_NetworkHandler: ModuleBase
     void CmdPlayCassette(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
     {
         if (!GetGame().IsDedicated()) return;
+        if (!sender) return;
         Param2<Object, string> data; if (!ctx.Read(data)) return;   // плеер, плейлист
         PlayerBase pl = PlayerBase.Cast(GetGame().GetPlayerByID(sender.GetId()));
         if (!UE_Security.Instance().ValidateCommand(pl, data.param1, 0)) return;
@@ -159,6 +158,7 @@ class UE_NetworkHandler: ModuleBase
     void CmdPlayDisk(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
     {
         if (!GetGame().IsDedicated()) return;
+        if (!sender) return;
         Param2<Object, string> data; if (!ctx.Read(data)) return;
         PlayerBase pl = PlayerBase.Cast(GetGame().GetPlayerByID(sender.GetId()));
         if (!UE_Security.Instance().ValidateCommand(pl, data.param1, 1)) return;
@@ -169,6 +169,7 @@ class UE_NetworkHandler: ModuleBase
     void CmdPlayRadio(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
     {
         if (!GetGame().IsDedicated()) return;
+        if (!sender) return;
         Param2<Object, string> data; if (!ctx.Read(data)) return;   // приёмник, ключ станции
         PlayerBase pl = PlayerBase.Cast(GetGame().GetPlayerByID(sender.GetId()));
         if (!UE_Security.Instance().ValidateCommand(pl, data.param1, 2)) return;
@@ -184,7 +185,14 @@ class UE_NetworkHandler: ModuleBase
     void CmdStopSource(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
     {
         if (!GetGame().IsDedicated()) return;
+        if (!sender) return;
         Param1<int> data; if (!ctx.Read(data)) return;
+        // стоп разрешён только тем же правилам доступа, что и старт:
+        // найдём объект-носитель источника и проверим игрока
+        UE_PlaybackState st;
+        if (!UE_AudioManager.Instance().m_Sources.Find(data.param, st)) return;
+        PlayerBase pl = PlayerBase.Cast(GetGame().GetPlayerByID(sender.GetId()));
+        if (!UE_Security.Instance().ValidateCommand(pl, st.object, st.type)) return;
         UE_AudioManager.Instance().StopSource(data.param);
     }
 
@@ -240,5 +248,85 @@ class UE_NetworkHandler: ModuleBase
             case UE_SourceType.CAR:     return "dzue/sounds/car/" + p + ".ogg";
         }
         return "";
+    }
+};
+
+// ============================================================
+//  UE_DownloadWatcher — клиент: перезапуск звука после того,
+//  как движок завершил докачку трека с HTTP-зеркала библиотеки.
+//  (DayZ Game API: OnDownloadFinished вызывается на клиенте.)
+// ============================================================
+class UE_PendingDownload
+{
+    int srcId;
+    int type;
+    string key;      // станция/плейлист из RPC
+    string extra;
+    vector pos;
+    float vol;
+};
+
+class UE_DownloadWatcher: ScriptCallbackBase
+{
+    static ref map<string, ref UE_PendingDownload> s_Waiting;  // локальный путь -> ждущий источник
+
+    static void Watch(int srcId, int type, string stationKey, string playlist, vector pos, float vol)
+    {
+        if (!s_Waiting) s_Waiting = new map<string, ref UE_PendingDownload>;
+        if (type == UE_SourceType.RADIO) return;   // стрим качать не нужно
+        // ключ библиотеки для плейлиста: "<dir>/<folder>" (Type/Rock, CD/Dance...)
+        string libKey = ResolveLibKey(type, stationKey, playlist);
+        if (libKey.Length() == 0) return;
+        // если файл уже в кэше — ничего не делаем (звук уже играет им)
+        if (UE_MusicLibrary.HasCachedFile(libKey)) return;
+        // регистрируем ожидание по каждому возможному расширению
+        string probe = UE_MusicLibrary.CacheDir() + libKey;
+        Register(probe + ".ogg", srcId, type, stationKey, playlist, pos, vol);
+        Register(probe + ".mp3", srcId, type, stationKey, playlist, pos, vol);
+        Register(probe + ".wav", srcId, type, stationKey, playlist, pos, vol);
+        // инициируем докачку (асинхронно, без блокировки тика)
+        UE_MusicLibrary.TryDownloadAsync(libKey);
+    }
+
+    //~ соответствие legacy-плейлиста ("Rock"/"Pop") -> ключ внешней библиотеки
+    static string ResolveLibKey(int type, string stationKey, string playlist)
+    {
+        string dir = (type == UE_SourceType.DISK) ? "CD" : "Type";
+        string name = (playlist.Length() > 0) ? playlist : stationKey;
+        if (name.Length() == 0) return "";
+        // точное совпадение с зарегистрированным ключом
+        string full = dir + "/" + name;
+        if (UE_MusicLibrary.ClientHasPlaylist(full)) return full;
+        return "";
+    }
+
+    static void Register(string localPath, int srcId, int type, string key, string extra, vector pos, float vol)
+    {
+        UE_PendingDownload pd = new UE_PendingDownload;
+        pd.srcId = srcId; pd.type = type; pd.key = key; pd.extra = extra; pd.pos = pos; pd.vol = vol;
+        s_Waiting.Set(localPath.ToLower(), pd);
+    }
+
+    override void OnDownloadFinished(string arg, CallReturnCodes return_code, uint data)
+    {
+        if (!s_Waiting) return;
+        string probe = arg.ToLower();
+        UE_PendingDownload pd;
+        if (!s_Waiting.Find(probe, pd)) return;
+        // убираем все записи этого источника (другие расширения больше не нужны)
+        for (int k = s_Waiting.Count() - 1; k >= 0; k--)
+        {
+            if (s_Waiting.GetByIndex(k).Get2().srcId == pd.srcId)
+                s_Waiting.Remove(s_Waiting.GetByIndex(k).Get1());
+        }
+        if (return_code != CallReturnCodes.PROCESS_DONE) return;
+        // файл скачан — перезапускаем локальный звук этого источника
+        UE_LocalSound snd;
+        if (UE_AudioManager.ClientSounds().Find(pd.srcId, snd))
+        {
+            snd.Stop();
+            snd.Play(arg, pd.pos, pd.vol, true);
+            Print("[унесённые] трек докачан, возобновлено воспроизведение #" + pd.srcId);
+        }
     }
 };

@@ -3,15 +3,31 @@
 // ============================================================
 class MissionClientUnesennye: MissionGamePlay
 {
-    void MissionClientUnesennye() {}
+    ref UE_DownloadWatcher m_DownloadWatcher;   // докачка треков с HTTP-зеркала
+
+    void MissionClientUnesennye()
+    {
+        m_DownloadWatcher = new UE_DownloadWatcher;
+        // регистрируем асинхронный загрузчик файлов библиотеки
+        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(
+            GetGame().CreateAsyncFileDownloader(), "Download",
+            array<string>({"placeholder"}), "OnDownloadFinished", "OnDownloadFinished", CALL_STATE_OK);
+    }
+
+    void OnDownloadFinished(string arg, CallReturnCodes return_code, uint data)
+    {
+        if (m_DownloadWatcher) m_DownloadWatcher.OnDownloadFinished(arg, return_code, data);
+    }
 };
 
-modded class MissionBase
+modded class ModuleManager
 {
-    override void OnInit()
+    override void Init()
     {
-        super.OnInit();
-        // гарантируем загрузку аудио-ядра на обеих сторонах
-        UE_AudioManager.Instance().InitFromConfig();
+        super.Init();
+        // сетевой слой мода: регистрируем RPC-обработчики (клиент + сервер)
+        UE_NetworkHandler h = new UE_NetworkHandler;
+        h.Register();
+        Print("[унесённые] Сетевые обработчики зарегистрированы");
     }
 };

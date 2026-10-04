@@ -20,7 +20,7 @@ class ActionUE_PlayCassette: ActionContinuousBase
         m_Text = "Включить музыку (кассета)";
     }
 
-    void CreateConditionParams(ref out array<ActionConditionParam> params)
+    void CreateConditionParams(out array<ActionConditionParam> params)
     {
         params.Insert(AliveCondition);
         params.Insert(HasAlsoRequiredItems);
@@ -36,7 +36,8 @@ class ActionUE_PlayCassette: ActionContinuousBase
 
     private bool HaveInInventory(PlayerBase pl, string cls)
     {
-        return pl.GetInventory().FindItem(cls) != null;
+        if (!pl || !pl.GetInventory()) return false;
+        return pl.GetInventory().FindEntity(cls) != null;
     }
 };
 
@@ -66,12 +67,14 @@ class ActionUE_PlayCassetteCB: ActionContinuousCallbackBase
     {
         if (GetGame().IsDedicated()) return;
         PlayerBase pl = data.m_player;
-        Object cassette = pl.GetInventory().FindItem("UE_Item_Cassette_Rock");
-        if (!cassette) cassette = pl.GetInventory().FindItem("UE_Item_Cassette_Pop");
+        if (!pl || !pl.GetInventory()) return;
+        EntityAI cassette = pl.GetInventory().FindEntity("UE_Item_Cassette_Rock");
+        if (!cassette) cassette = pl.GetInventory().FindEntity("UE_Item_Cassette_Pop");
         if (!cassette) return;
 
         string playlist = cassette.GetType() == "UE_Item_Cassette_Rock" ? "Rock" : "Pop";
-        Object playerObj = pl.GetInventory().FindItem("UE_CassettePlayer");
+        // источник звука привязываем к самому плееру игрока (он же и носитель)
+        Object playerObj = pl.GetInventory().FindEntity("UE_CassettePlayer");
         if (!playerObj) return;
 
         // отправляем запрос НА СЕРВЕР (там всё проверит UE_Security)
@@ -95,11 +98,10 @@ modded class UE_CassettePlayer
     }
 };
 
-modded class ActionHandlers
+modded class ActionBuilders
 {
-    static ref array<ref ActionBase> CreateActionsUE_CassettePlayer(out ActionBase actions[], Object object, int slot, ItemType type)
+    static void AddActionUE_CassettePlayer(ref array<ActionBase> actions)
     {
         actions.Insert(new ActionUE_PlayCassette());
-        return actions;
     }
 };

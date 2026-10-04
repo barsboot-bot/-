@@ -34,6 +34,7 @@ class UE_Security: ScriptModule
         if (!player) return false;
 
         string pid = player.GetID();                   // ID соединения/профиля
+        if (pid.Length() == 0) pid = "unknown";
 
         // 1) игрок должен существовать и быть живым
         if (player.IsDead()) { LogViolation(pid, "мёртвый игрок пытается управлять"); return false; }
@@ -115,19 +116,22 @@ class UE_Security: ScriptModule
         Car car = Car.Cast(o);
         if (!car) return false;
         // читаем флаг ueCarRadio из config.cpp CfgVehicles данного класса
-        int flag = GetGame().ConfigGetInt(car.GetType(), "ueCarRadio");
+        int flag = 0;
+        GetGame().ConfigGetInt(car.GetType() + ".ueCarRadio", flag);
         return flag == 1;
     }
 
     bool HasAccess(PlayerBase pl, Object o)
     {
+        if (!pl || !o) return false;
         // объект в руках/инвентаре игрока?
         if (o == pl) return true;
-        if (pl.CanReachObject(o)) return true;
+        if (pl.GetInventory() && pl.GetInventory().FindItem(o.GetType()) == o) return true;
         // объект лежит рядом (< 5 м)
         if (vector.Distance(pl.GetPosition(), o.GetPosition()) < 5.0) return true;
         // машина, в которой едет игрок
-        if (pl.GetParentOfAttachment() == o || pl.InVehicle() == Vehicle.Cast(o)) return true;
+        Car c = Car.Cast(o);
+        if (c && pl.IsInVehicle(c)) return true;
         return false;
     }
 
@@ -158,7 +162,7 @@ class UE_Security: ScriptModule
         uint h = 2166136261;
         for (int i = 0; i < src.Length(); i++)
         {
-            h ^= src.Get(i);
+            h ^= (uint)src.Get(i);
             h *= 16777619;
         }
         return "" + h;

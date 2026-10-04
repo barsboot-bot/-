@@ -86,18 +86,28 @@ class UE_MusicLibrary: ScriptModule
     static void SetRoot(string root)
     {
         if (root.Length() == 0) root = "Music";
+        // нормализуем разделители и убираем хвостовой слэш
+        root = root.Replace("\\", "/");
+        while (root.Length() > 1 && root.Get(root.Length() - 1) == '/')
+            root = root.SubstringWithLimit(0, root.Length() - 1);
         s_RootRel = root;
         if (IsAbsolute(root))
             s_RootAbs = root;
         else
-            s_RootAbs = GetGame().GetProfileDir() + root;
+            s_RootAbs = GetGame().GetProfileDir() + root;   // профиль уже заканчивается '/'
     }
 
     static bool IsAbsolute(string p)
     {
         if (p.Length() == 0) return false;
-        if (p.Get(0) == '~') return true;              // движковый home-префикс
-        if (p.Contains(":\\") || p.Contains(":/")) return true; // C:\... или /mnt...
+        if (p.Get(0) == '~') return true;                  // движковый home-префикс (~, ~@Addon, ~/...)
+        if (p.Get(0) == '/') return true;                  // unix-путь /srv/music
+        if (p.Length() >= 2)
+        {
+            char c0 = p.Get(0);
+            bool letter = (c0 >= 'A' && c0 <= 'Z') || (c0 >= 'a' && c0 <= 'z');
+            if (letter && p.Get(1) == ':') return true;    // Windows: C:/music
+        }
         return false;
     }
 
@@ -122,6 +132,7 @@ class UE_MusicLibrary: ScriptModule
         InitDefaults();
 
         // гарантируем структуру, чтобы админу было куда класть файлы
+        MakeDirectory(s_RootAbs);
         MakeDirectory(Full("Type"));
         MakeDirectory(Full("CD"));
 
@@ -152,38 +163,51 @@ class UE_MusicLibrary: ScriptModule
     {
         if (!FileExists(path))
         {
-            GetFileFactory(GetFileFactoryType()).CreateFolder(path);
+            // CreateFolder(<путь>, <рекурсивно>) — движковая фабрика файлов.
+            // Путь не должен заканчиваться слэшем.
+            string p = path;
+            while (p.Length() > 1 && (p.Get(p.Length()-1) == '/' || p.Get(p.Length()-1) == '\\'))
+                p = p.SubstringWithLimit(0, p.Length() - 1);
+            GetFileFactory(GetFileFactoryType()).CreateFolder(p, true);
         }
     }
 
     static void ScanMediaDir(string dirName)   // "Type" или "CD"
     {
-        string mask = Full(dirName);
-        array<string> folders = {};
-        FindFileGroup(mask + "/", folders, true);   // рекурсивно все подпапки
+        string rootFull = Full(dirName);                 // .../Music/Type
+        array<string> groups = {};
+        // ищем все подпапки первого уровня внутри Music/Type и Music/CD
+        FindFileGroup(rootFull + "/*", groups, false);
 
-        for (int i = 0; i < folders.Count(); i++)
+        for (int i = 0; i < groups.Count(); i++)
         {
-            string fpath = folders.Get(i);
-            if (fpath.Get(fpath.Length() - 1) != '\\')
-                fpath.Insert(fpath.Length(), "\\");
-            string fname = fpath.SubstringWithLimit(0, fpath.Length() - 1);
-            while (fname.Contains("\\")) fname = fname.Replace("\\", "/");
+            string gpath = groups.Get(i);
+            // нормализуем разделители, убираем хвостовые слэши
+            while (gpath.Contains("\\\")) gpath = gpath.Replace("\\\", "/");
+            while (gpath.Length() > 0 && gpath.Get(gpath.Length()-1) == '/')
+                gpath = gpath.SubstringWithLimit(0, gpath.Length() - 1);
+
+            // имя папки = последний сегмент после rootFull/
+            string rel = gpath;
+            int cut = gpath.IndexOf(rootFull);
+            if (cut == 0) rel = gpath.SubstringWithLimit(rootFull.Length() + 1, gpath.Length() - rootFull.Length() - 1);
+            while (rel.Contains("/")) rel = rel.Replace("/", "_");   // защита от вложенности
+            if (rel.Length() == 0) continue;
 
             // уже зарегистрированы?
-            string key = dirName + "/" + fname;
+            string key = dirName + "/" + rel;
             UE_PlaylistInfo dummy;
             if (s_SerIndex.Find(key.ToLower(), dummy)) continue;
 
             // есть ли медиафайлы в этой папке?
-            int n = CountMedia(fpath);
+            int n = CountMedia(gpath);
             if (n == 0) continue;
 
             UE_PlaylistInfo info = new UE_PlaylistInfo;
             info.key = key;
             info.dir = dirName;
-            info.folder = fname;
-            info.displayName = ReadMetaName(fpath, fname);
+            info.folder = rel;
+            info.displayName = ReadMetaName(gpath, rel);
             info.trackCount = n;
 
             s_SerPlaylists.Insert(info);
@@ -194,9 +218,12 @@ class UE_MusicLibrary: ScriptModule
 
     static int CountMedia(string folderPath)
     {
+        string fp = folderPath;
+        while (fp.Length() > 0 && (fp.Get(fp.Length()-1) == '/' || fp.Get(fp.Length()-1) == '\\'))
+            fp = fp.SubstringWithLimit(0, fp.Length() - 1);
         array<string> files = {};
         int total = 0;
-        if (FindFile(folderPath, "*.ogg", files, false)) total += files.Count();
+        if (FindFile(fp, "*.ogg", files, false)) total += files.Count();
         files.Clear();
         if (FindFile(folderPath, "*.mp3", files, false)) total += files.Count();
         files.Clear();
@@ -206,10 +233,13 @@ class UE_MusicLibrary: ScriptModule
 
     static string ReadMetaName(string folderPath, string fallback)
     {
-        string metaPath = folderPath + "/meta.txt";
+        string metaPath = folderPath;
+        while (metaPath.Length() > 0 && (metaPath.Get(metaPath.Length()-1) == '/' || metaPath.Get(metaPath.Length()-1) == '\\'))
+            metaPath = metaPath.SubstringWithLimit(0, metaPath.Length() - 1);
+        metaPath = metaPath + "/meta.txt";
         if (!FileExists(metaPath)) return fallback;
         FileHandle f = OpenFile(metaPath, FileMode.READ);
-        if (f == 0) return fallback;
+        if (FileIsSame(f, NULL)) return fallback;
         string line;
         string name = "";
         while (FGets(f, line) >= 0)
@@ -249,7 +279,7 @@ class UE_MusicLibrary: ScriptModule
             CreateDefaultRadioTxt(path);
         }
         FileHandle f = OpenFile(path, FileMode.READ);
-        if (f == 0) { Print("[UE_MusicLibrary] Radio.txt: не удалось открыть"); return; }
+        if (FileIsSame(f, NULL)) { Print("[UE_MusicLibrary] Radio.txt: не удалось открыть"); return; }
 
         string line;
         int added = 0;
@@ -281,7 +311,7 @@ class UE_MusicLibrary: ScriptModule
     static void CreateDefaultRadioTxt(string path)
     {
         FileHandle f = OpenFile(path, FileMode.WRITE);
-        if (f == 0) return;
+        if (FileIsSame(f, NULL)) return;
         FPutS(f, "# унесённые — список радиостанций\n");
         FPutS(f, "# формат: Название = URL потока (http/https)\n");
         FPutS(f, "# Апекс, Европа+ и Юмор FM зашиты в конфиг и доступны всегда.\n");
@@ -305,7 +335,7 @@ class UE_MusicLibrary: ScriptModule
         {
             char c = name.Get(i);
             bool ok = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
-            k.Append(ok ? "" + c : "_");
+            k.Append(ok ? c.AsString() : "_");
         }
         if (k.Length() == 0) k = "station";
         return k;
@@ -411,7 +441,7 @@ class UE_MusicLibrary: ScriptModule
         array<ref> bytes = {};
         BinItem bi = new BinItem;
         for (int i = 0; i < src.Length(); i++)
-            bi.Insert(src.Get(i));
+            bi.Insert(ToInt(src.Get(i)));
         bytes.Insert(bi);
         string enc;
         if (!Codec.EncodeBase64(bytes, enc)) return "";
@@ -552,40 +582,67 @@ class UE_MusicLibrary: ScriptModule
 
     static void TryDownload(string key)
     {
+        // синхронная версия — НЕ используется из игрового тика (блокирует поток).
+        // оставлена как утилита для оффлайн-скриптов.
+        TryDownloadAsync(key);
+    }
+
+    static bool HasCachedFile(string key)
+    {
+        string exts[3]; exts[0] = ".ogg"; exts[1] = ".mp3"; exts[2] = ".wav";
+        for (int e = 0; e < 3; e++)
+        {
+            if (FileExists(CacheDir() + key + exts[e])) return true;
+        }
+        return false;
+    }
+
+    //~ Асинхронная докачка через движковый AsyncFileDownloader
+    //~ (событие OnDownloadFinished обрабатывает UE_DownloadWatcher).
+    static void TryDownloadAsync(string key)
+    {
         if (!s_DownloadTried) return;
         if (s_DownloadTried.GetOrAdd(key, false)) return;   // уже пробовали
         s_DownloadTried.Set(key, true);
 
-        if (s_BaseURL.Length() == 0) return;
+        if (!s_BaseURL || s_BaseURL.Length() == 0) return;
 
+        string url = s_BaseURL;
+        if (url.Get(url.Length() - 1) != '/') url.Append("/");
+        url.Append(key);
+
+        string local = CacheDir() + key;
+        MakeDirectoryRecursive(CacheDir() + key.SubstringWithLimit(0, key.IndexOf("/") + 1));
+
+        // скачиваем только тот формат, которого ещё нет локально
+        ref array<string> urls = new array<string>;
+        ref array<string> dests = new array<string>;
         string exts[3]; exts[0] = ".ogg"; exts[1] = ".mp3"; exts[2] = ".wav";
         for (int e = 0; e < 3; e++)
         {
-            string url = s_BaseURL;
-            if (url.Get(url.Length() - 1) != '/') url.Append("/");
-            url.Append(key);
-            url.Append(exts[e]);
-
-            string local = CacheDir() + key + exts[e];
-            MakeDirectoryRecursive(CacheDir() + key.SubstringWithLimit(0, key.IndexOf("/") + 1));
-
-            // синхронная качалка движка (DownloadFile возвращает код CallAsyncCode).
-            // ВНИМАНИЕ админам: если зеркало медленное, замените на фоновый поток,
-            // чтобы не блокировать игровой тик клиента.
-            int res = DownloadFile(url, local);
-            if (res == CallAsyncCode.OK)
+            if (!FileExists(local + exts[e]))
             {
-                Print("[UE_MusicLibrary] трек скачан: " + url);
-                return;
+                urls.Insert(url + exts[e]);
+                dests.Insert(local + exts[e]);
             }
-            Print("[UE_MusicLibrary] докачка не удалась (" + url + "), код: " + res);
         }
+        if (urls.Count() == 0) return;
+
+        ref ScriptParam_ArrayString urlsp = new ScriptParam_ArrayString;
+        urlsp.Set(urls);
+        ref ScriptParam_ArrayString destsp = new ScriptParam_ArrayString;
+        destsp.Set(dests);
+
+        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(
+            GetGame().CreateAsyncFileDownloader(), "Download", urlsp, destsp,
+            "OnDownloadFinished", "OnDownloadProgress", CALL_STATE_OK);
+        Print("[UE_MusicLibrary] докачка поставлена в очередь: " + url);
     }
 
     static void MakeDirectoryRecursive(string path)
     {
         if (path.Length() == 0) return;
         if (!FileExists(path))
-            GetFileFactory(GetFileFactoryType()).CreateFolder(path);
+            GetFileFactory(GetFileFactoryType()).CreateFolder(path, true);
     }
 };

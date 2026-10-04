@@ -34,7 +34,7 @@ class CfgPatches
         requiredVersion = 0;
         requiredAddons[] = {};
         units[] = { "UE_CassettePlayer", "UE_DiskPlayer", "UE_RadioReceiver", "UE_CarRadioUnit" };
-        weapons[] = { "UE_Magazine_Cassette_Rock", "UE_Magazine_Cassette_Pop", "UE_Magazine_Disk_Classic", "UE_Item_Cassette_Rock", "UE_Item_Disk_Pop" };
+        weapons[] = { "UE_Magazine_Cassette_Rock", "UE_Magazine_Cassette_Pop", "UE_Magazine_Disk_Classic", "UE_Item_Cassette_Rock", "UE_Item_Disk_Dance" };
     };
 };
 
@@ -79,7 +79,6 @@ class CfgVehicles
     class InventoryBase;
     class ItemBase;
     class Battery;
-    #define _QUOTE(X) #X
 
     // ================== КАССЕТНЫЙ ПЛЕЕР ==================
     class UE_CassettePlayer_Base: InventoryBase

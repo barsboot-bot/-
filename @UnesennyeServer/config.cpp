@@ -53,7 +53,6 @@ class CfgRemoteExec
             jip = "false";
         };
     };
-    classes[] = { "UE_ModulePlayer", "UE_ModuleRadio", "UE_NetworkHandler" };
 };
 
 class CfgServerProblemDetector

@@ -7,29 +7,69 @@
 class ActionUE_TuneApex: ActionContinuousBase
 {
     ActionUE_TuneApex() { m_CallbackClass = ActionUE_RadioCB; m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_EMOTEATEND; m_Text = "Настроить: Апекс ФМ"; }
-    void CreateConditionParams(ref out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
+    void CreateConditionParams(out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
 }
 class ActionUE_TuneEuropa: ActionContinuousBase
 {
     ActionUE_TuneEuropa() { m_CallbackClass = ActionUE_RadioCB; m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_EMOTEATEND; m_Text = "Настроить: Европа Плюс"; }
-    void CreateConditionParams(ref out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
+    void CreateConditionParams(out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
 }
 class ActionUE_TuneHumor: ActionContinuousBase
 {
     ActionUE_TuneHumor() { m_CallbackClass = ActionUE_RadioCB; m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_EMOTEATEND; m_Text = "Настроить: Юмор FM"; }
-    void CreateConditionParams(ref out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
+    void CreateConditionParams(out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
 }
 class ActionUE_StopRadio: ActionContinuousBase
 {
     ActionUE_StopRadio() { m_CallbackClass = ActionUE_StopRadioCB; m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_EMOTEATEND; m_Text = "Выключить радио"; }
-    void CreateConditionParams(ref out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
+    void CreateConditionParams(out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
 }
 
-// общий CB — ключ станции передаётся через m_Text разбор или отдельное поле
+// общий CB — ключ станции хранится в самом экшене (поле m_Station),
+// а не в статике: статика между параллельными инстансами экшенов гоняет data race
+class ActionUE_TuneBase: ActionContinuousBase
+{
+    string m_Station;   // Apex | EuropaPlus | HumorFM
+
+    void SetupTune(string station, string text)
+    {
+        m_CallbackClass = ActionUE_RadioCB;
+        m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_EMOTEATEND;
+        m_StanceMask = DayZPlayerConstants.STANCEMASK_CROUCH | DayZPlayerConstants.STANCEMASK_ERECT;
+        m_FullAction = "full";
+        m_Station = station;
+        m_Text = text;
+    }
+
+    string GetStationKey() { return m_Station; }
+
+    void CreateConditionParams(out array<ActionConditionParam> params)
+    {
+        params.Insert(AliveCondition);
+    }
+};
+
+class ActionUE_TuneApex: ActionUE_TuneBase
+{
+    ActionUE_TuneApex() { SetupTune("Apex", "Настроить: Апекс ФМ"); }
+}
+class ActionUE_TuneEuropa: ActionUE_TuneBase
+{
+    ActionUE_TuneEuropa() { SetupTune("EuropaPlus", "Настроить: Европа Плюс"); }
+}
+class ActionUE_TuneHumor: ActionUE_TuneBase
+{
+    ActionUE_TuneHumor() { SetupTune("HumorFM", "Настроить: Юмор FM"); }
+}
+class ActionUE_StopRadio: ActionContinuousBase
+{
+    ActionUE_StopRadio() { m_CallbackClass = ActionUE_StopRadioCB; m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_EMOTEATEND; m_Text = "Выключить радио"; }
+    void CreateConditionParams(out array<ActionConditionParam> params) { params.Insert(AliveCondition); }
+}
+
 class ActionUE_RadioCB: ActionContinuousCallbackBase
 {
     float timeTotal; float timePhase;
-    static string pendingStation = "";   // заполняется в OnActionEvaluate по классу экшена
 
     void ActionUE_RadioCB(out ActionContinuousBase aCB)
     {
@@ -39,12 +79,8 @@ class ActionUE_RadioCB: ActionContinuousCallbackBase
 
     bool OnActionEvaluate(ActionContinuousData data)
     {
-        // определяем станцию по названию экшена
-        string txt = data.m_Action.GetText();
-        if (txt.Contains("Апекс"))       pendingStation = "Apex";
-        else if (txt.Contains("Европа")) pendingStation = "EuropaPlus";
-        else if (txt.Contains("Юмор"))   pendingStation = "HumorFM";
-        return pendingStation.Length() > 0;
+        ActionUE_TuneBase tune = ActionUE_TuneBase.Cast(data.m_Action);
+        return tune && tune.GetStationKey().Length() > 0;
     }
 
     void OnActionA(ActionContinuousData data, float t) {}
@@ -53,11 +89,14 @@ class ActionUE_RadioCB: ActionContinuousCallbackBase
     {
         if (GetGame().IsDedicated()) return;
         PlayerBase pl = data.m_player;
-        Object rx = pl.GetInventory().FindItem("UE_RadioReceiver");
+        if (!pl || !pl.GetInventory()) return;
+        ActionUE_TuneBase tune = ActionUE_TuneBase.Cast(data.m_Action);
+        if (!tune) return;
+        Object rx = pl.GetInventory().FindEntity("UE_RadioReceiver");
         if (!rx) return;
-        Param2<Object, string> p = new Param2<Object, string>(rx, pendingStation);
+        Param2<Object, string> p = new Param2<Object, string>(rx, tune.GetStationKey());
         GetRPCManager().SendRPC("UE_Network", "CmdPlayRadio", p, true, null);
-        Print("[унесённые] Радио: " + UE_AudioManager.GetStationName(pendingStation));
+        Print("[унесённые] Радио: " + UE_AudioManager.GetStationName(tune.GetStationKey()));
     }
 };
 
@@ -70,9 +109,11 @@ class ActionUE_StopRadioCB: ActionContinuousCallbackBase
     {
         if (GetGame().IsDedicated()) return;
         // просим сервер остановить источник этого приёмника
-        Object rx = data.m_player.GetInventory().FindItem("UE_RadioReceiver");
+        PlayerBase pl = data.m_player;
+        if (!pl || !pl.GetInventory()) return;
+        Object rx = pl.GetInventory().FindEntity("UE_RadioReceiver");
         if (!rx) return;
-        int id = UE_FindSourceByObject(rx);
+        int id = UE_AudioManager.FindSourceByObject(rx);
         if (id >= 0)
         {
             Param1<int> p = new Param1<int>(id);
@@ -81,25 +122,13 @@ class ActionUE_StopRadioCB: ActionContinuousCallbackBase
     }
 };
 
-static int UE_FindSourceByObject(Object o)
+modded class ActionBuilders
 {
-    auto mgr = UE_AudioManager.Instance();
-    for (int i = 0; i < mgr.m_Sources.Count(); i++)
-    {
-        UE_PlaybackState st = mgr.m_Sources.GetByIndex(i).Get2();
-        if (st.object == o) return st.id;
-    }
-    return -1;
-}
-
-modded class ActionHandlers
-{
-    static ref array<ref ActionBase> CreateActionsUE_RadioReceiver(out ActionBase actions[], Object object, int slot, ItemType type)
+    static void AddActionUE_RadioReceiver(ref array<ActionBase> actions)
     {
         actions.Insert(new ActionUE_TuneApex());
         actions.Insert(new ActionUE_TuneEuropa());
         actions.Insert(new ActionUE_TuneHumor());
         actions.Insert(new ActionUE_StopRadio());
-        return actions;
     }
 };

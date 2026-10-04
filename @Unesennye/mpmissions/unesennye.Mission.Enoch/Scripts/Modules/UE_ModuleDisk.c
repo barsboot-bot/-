@@ -13,7 +13,7 @@ class ActionUE_PlayDisk: ActionContinuousBase
         m_Text = "Включить музыку (диск)";
     }
 
-    void CreateConditionParams(ref out array<ActionConditionParam> params)
+    void CreateConditionParams(out array<ActionConditionParam> params)
     {
         params.Insert(AliveCondition);
         params.Insert(IsNotBusyCondition);
@@ -27,7 +27,8 @@ class ActionUE_PlayDisk: ActionContinuousBase
 
     private bool HaveInInventory(PlayerBase pl, string cls)
     {
-        return pl.GetInventory().FindItem(cls) != null;
+        if (!pl || !pl.GetInventory()) return false;
+        return pl.GetInventory().FindEntity(cls) != null;
     }
 };
 
@@ -51,12 +52,13 @@ class ActionUE_PlayDiskCB: ActionContinuousCallbackBase
     {
         if (GetGame().IsDedicated()) return;
         PlayerBase pl = data.m_player;
-        Object disk = pl.GetInventory().FindItem("UE_Item_Disk_Classic");
-        if (!disk) disk = pl.GetInventory().FindItem("UE_Item_Disk_Dance");
+        if (!pl || !pl.GetInventory()) return;
+        EntityAI disk = pl.GetInventory().FindEntity("UE_Item_Disk_Classic");
+        if (!disk) disk = pl.GetInventory().FindEntity("UE_Item_Disk_Dance");
         if (!disk) return;
 
         string playlist = disk.GetType() == "UE_Item_Disk_Classic" ? "Classic" : "Dance";
-        Object deck = pl.GetInventory().FindItem("UE_DiskPlayer");
+        Object deck = pl.GetInventory().FindEntity("UE_DiskPlayer");
         if (!deck) return;
 
         Param2<Object, string> p = new Param2<Object, string>(deck, playlist);
@@ -65,11 +67,10 @@ class ActionUE_PlayDiskCB: ActionContinuousCallbackBase
     }
 };
 
-modded class ActionHandlers
+modded class ActionBuilders
 {
-    static ref array<ref ActionBase> CreateActionsUE_DiskPlayer(out ActionBase actions[], Object object, int slot, ItemType type)
+    static void AddActionUE_DiskPlayer(ref array<ActionBase> actions)
     {
         actions.Insert(new ActionUE_PlayDisk());
-        return actions;
     }
 };
