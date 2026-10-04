@@ -108,25 +108,29 @@ def main():
     # всё содержимое @Unesennye кроме самой папки Missions/mpmissions (они — отдельные pbo)
     src = os.path.join(ROOT, "@Unesennye")
     for item in os.listdir(src):
-        if item in ("Missions", "mpmissions"):
+        # Missions/mpmissions — отдельные pbo; Bridges — нативные DLL, НЕ пакуется в PBO
+        # (движок Expansive грузит их из <DayZ>/Bridges/@Unesennye_Bridge/UE_Bridge/)
+        if item in ("Missions", "mpmissions", "Bridges"):
             continue
         s = os.path.join(src, item)
         d = os.path.join(stage_cli, item)
         copytree(s, d) if os.path.isdir(s) else shutil.copy2(s, d)
-    os.makedirs(os.path.join(stage_cli, "Missions"))
     os.makedirs(os.path.join(stage_cli, "mpmissions"))
+
+    # Копия исходников моста выносится в build_out/Bridges для ручной установки
+    bridges_src = os.path.join(src, "Bridges")
+    if os.path.isdir(bridges_src):
+        copytree(bridges_src, os.path.join(OUT, "Bridges"))
 
     packer = (lambda s, o: pack_with_armake(exe, s, o)) if exe else pack_native_pbo
 
     # главный PBO клиента
     packer(stage_cli, os.path.join(stage_cli, "Unesennye.pbo"))
 
-    # PBO миссии (в Missions и mpmissions — одинаковые)
+    # PBO миссии (кладём в mpmissions — DayZ Expansive грузит миссию мода отсюда)
     mission_src = os.path.join(src, "mpmissions", "unesennye.Mission.Enoch")
-    m1 = os.path.join(stage_cli, "Missions", "unesennye.Mission.Enoch.pbo")
     m2 = os.path.join(stage_cli, "mpmissions", "unesennye.Mission.Enoch.pbo")
-    packer(mission_src, m1)
-    shutil.copy2(m1, m2)
+    packer(mission_src, m2)
 
     # ---- staging сервера @UnesennyeServer --------------------------------
     stage_srv = os.path.join(OUT, "@UnesennyeServer")

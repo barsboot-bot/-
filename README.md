@@ -85,7 +85,7 @@ python build_pbo.py          # → build_out/ (native unsigned PBO, без вн�
 | `UE_Bridge/bass_sdk/` (bass.h, bass.lib x86/x64, bass.dll x64) | уже внутри Unesennye.pbo | ✅ скачано с un4seen.com |
 
 ### Нужно докачать/собрать вручную
-1. **bass_aac.dll (x64)** — плагин AAC для «Европа+» (.aac-стрим). un4seen.com → BASS add-ons → «AAC», положить в `@Unesennye/UE_Bridge/bass_sdk/addon/aac/x64/`. Без него Апекс и ЮморFM (MP3) играют, Европа+ — нет.
+1. **bass_aac.dll (x64)** — плагин AAC для «Европа+» (.aac-стрим). un4seen.com → BASS add-ons → «AAC», положить в `@Unesennye/Bridges/@Unesennye_Bridge/UE_Bridge/bass_sdk/addon/aac/x64/`. Без него Апекс и ЮморFM (MP3) играют, Европа+ — нет.
 2. **UEAudioBridge.dll** — готовой сборки не существует; собрать из исходников на Windows:
    - MSVC: открыть «x64 Native Tools Command Prompt for VS» → `@Unesennye\UE_Bridge\build\build_msvc.bat` (BASS SDK уже лежит в `bass_sdk\`);
    - MinGW: `build_mingw.bat`;

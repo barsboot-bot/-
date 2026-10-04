@@ -4,6 +4,20 @@ class cfgMods
     timepacked = "1728014400";
 };
 
+// Нативный аудио-мост (BASS) для DayZ Expansive.
+// На клиенте размещается в: Bridges\@Unesennye_Bridge\UE_Bridge
+// Сюда же кладутся собранные UEAudioBridge.dll (x64), bass.dll (x64) и bass_aac.dll (x64).
+class CfgBridges
+{
+    class UE_Bridge
+    {
+        name = "Unesennye Audio Bridge (BASS)";
+        version = "1.0.0";
+        libraryName = "UEAudioBridge.dll"; // x64
+        requiredAddons[] = {"Unesennye_Client"};
+    };
+};
+
 // ============================================================
 //  Мод «унесённые» (Unesennye) — клиентская часть
 //  Кассеты / виниловые диски / интернет-радио / музыка в машине.
