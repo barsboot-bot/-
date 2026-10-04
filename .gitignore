@@ -1,1 +1,5 @@
-(empty)
+# Артефакты сборки и секреты
+*.biprivatekey
+build/staging/
+__pycache__/
+*.pyc
