@@ -1,102 +1,109 @@
-# 🎵 Мод «унесённые» (Unesennye) для DayZ
+# 📼 унесённые | Uness — мод музыки для DayZ Standalone
 
-Мод добавляет **музыку**: кассеты, диски, интернет-радио и автомобильную магнитолу. Звук слышат **все игроки рядом**, громкость **затухает с расстоянием**. Есть **серверная защита** от злоупотреблений.
+**Версия:** 1.0.0 · **Автор:** KRa Tos (Константин) · **Лицензия:** только сервер «Унесённые»
 
-## Возможности
-| Функция | Предметы | Действие |
-|---|---|---|
-| 📼 Кассеты | `UE_CassettePlayer` + `UE_Item_Cassette_Rock/Pop` | «Включить музыку (кассета)» |
-| 💿 Диски | `UE_DiskPlayer` + `UE_Item_Disk_Classic/Dance` | «Включить музыку (диск)» |
-| 📻 Радио-стримы | `UE_RadioReceiver` | «Настроить: Апекс / Европа Плюс / Юмор FM» |
-| 🚗 Музыка в машине | авто с флагом `ueCarRadio=1` | «Включить музыку в машине» |
+> **Моды переименованы:** клиентский мод — **@Uness**, серверный — **@KRa_TosServer**
+> (аддоны: `Uness_Data.pbo`, `Uness_Scripts.pbo`, `KRa_TosServerInit.pbo`).
 
-### Радиостанции (белый список сервера)
-- Апекс: http://62.152.59.3:8000/nkz
-- Европа+: http://online-2.gkvr.ru:8000/europa_nkz_64.aac
-- Юмор FM: http://62.231.184.253:8000/humor
+Атмосферный музыкальный мод: аудиокассеты, виниловые диски, интернет-радио и
+магнитолы в автомобилях. Звук реалистично затухает с расстоянием — его слышат
+все игроки рядом с источником.
 
-### Затухание звука
-Клиент пересчитывает громкость каждые 0.5 с по квадратичной модели  
-`V = base · (d₀/d)^k`, d₀ = 5 м (максимум), граница слышимости 150 м (параметры в `UE_Config`). Для машин позиция источника обновляется — звук следует за автомобилем.
+Проект собран по официальным гайдлайнам Bohemia Interactive / DayZ wiki
+(«Creating a mod», структура `@Mod/Addons/*.pbo`, `CfgPatches`, `CfgMods`,
+Enforce Script модули `3_Game / 4_World / 5_Mission`).
 
-## Структура
-```
-@Unesennye/                     # клиентский модпак (обязателен у игроков)
-├── config.cpp                  # предметы, станции, параметры затухания
-└── mpmissions/unesennye.Mission.Enoch/   # миссия со скриптами
-    ├── init.c mission.c description.cpp mission.xml
-    └── Scripts/
-        ├── Core/UE_AudioManager.c   # звуковое ядро + attenuation
-        ├── Core/UE_Security.c       # СЕРВЕРНАЯ ЗАЩИТА мода
-        ├── Network/UE_Network.c     # RPC клиент↔сервер↔все
-        └── Modules/UE_Module{Cassette,Disk,Radio,CarRadio}.c
-@UnesennyeServer/               # серверный защитный модпак
-└── config.cpp                  # checkModLoad, CfgRemoteExec whitelist, лимиты
-```
+---
 
-## Серверная защита (@UnesennyeServer + UE_Security)
-1. `checkModLoad = 1` — игрок без `@Unesennye` не подключится.
-2. `verifySignatures = 1` — подписи PBO (`.bikey` в `keys/`).
-3. `CfgRemoteExec` — разрешены только RPC мода, чужие блокируются.
-4. Runtime-валидация каждой команды на сервере: объект мода, живость игрока, дистанция ≤ 300 м, доступ к объекту, анти-флуд (≥1.5 с, ≤20 команд/мин), лимит 64 источников, HMAC-подпись пакета, белый список станций, лог нарушений.
-5. Нельзя включить произвольный URL — только станции из конфига.
-
-## Установка
-1. Скопировать `@Unesennye` и `@UnesennyeServer` на сервер.
-2. `serverDZ.cfg`: `modDir=@Unesennye;@UnesennyeServer`, `mission=unesennye.Mission.Enoch`.
-3. Подписать PBO своим ключом, `.bikey` положить в `keys/`.
-4. Игроки скачивают `@Unesennye`.
-
-## ⚠️ Важно для продакшена
-- **DayZ Engine не воспроизводит HTTP-стримы штатными средствами.** Слой `UE_LocalSound.Play(url,…)` требует аудио-прослойки (FMOD/BASS-мод или голосовой канал); без неё радио — заглушка. Треки кассет/дисков играют через штатный звук движка: положите `.ogg` в `dzue/sounds/cassettes|disks/…` внутри PBO.
-- Скрипты — рабочий каркас на EnforceScript: при сборке сверьте сигнатуры API вашей версии DayZ (1.2x).
-- Замените модели-заглушки (`notepad.p3d`, `magazine_rifle_556.p3d`) на свои `.p3d`.
-
-© Unesennye Team, 2026
-
-## Внешняя музыка без PBO (Music/)
-Музыка кассет/дисков НЕ пакуется в PBO. Сервер читает папку `<Profile>/Music`:
-```
-Music/Type/<плейлист>/track.ogg|mp3|wav   — кассеты
-Music/CD/<плейлист>/track.ogg|mp3|wav    — диски
-Music/Radio.txt                            — станции ("Название = URL")
-Music/<...>/meta.txt                       — name = Отображаемое имя
-```
-Клиенты получают манифест по RPC и докачивают треки с HTTP-зеркала
-(`UE_Config::libraryBaseURL`), кэш — `<Profile>/Music_cache/`.
-Образец структуры: `@UnesennyeServer/Music/`, зеркало: `@UnesennyeServer/tools/serve_music.py`.
-
-## Сборка в PBO
+## 📁 Структура репозитория
 
 ```
-python build_pbo.py          # → build_out/ (native unsigned PBO, без внешних тулзов)
+├── @Uness/                  # КЛИЕНТ + СЕРВЕР (мод-пак)
+│   ├── Addons/
+│   │   ├── Uness_Data/      # config.cpp: CfgPatches, CfgMods, CfgVehicles,
+│   │   │                        #   UE_RadioStations, UE_Config
+│   │   └── Uness_Scripts/   # Enforce Script:
+│   │       └── scripts/
+│   │           ├── 3_Game/UE_Global.c          # константы (UE_SourceType)
+│   │           ├── 4_World/UE_Module*.c        # экшены предметов (world module)
+│   │           └── 5_Mission/                  # миссия-модуль:
+│   │               ├── MissionServer.c         # точка входа (modded MissionServer)
+│   │               ├── UE_AudioManager.c       # ядро звука + затухание
+│   │               ├── UE_Network.c            # RPC-слой (GetRPCManager)
+│   │               ├── UE_MusicLibrary.c       # внешняя библиотека Music/
+│   │               └── UE_Security.c           # серверная валидация команд
+│   │       └── 5_Mission/UE_Guard.c            # защита: краш без @KRa_TosServer
+│   ├── Bridges/@Uness_Bridge/              # нативный BASS-мост (опционально)
+│   ├── Keys/uness.bikey                      # публичный ключ подписи
+│   └── config.cpp                              # корневой cfgMods/CfgBridges
+├── @KRa_TosServer/            # СЕРВЕРНАЯ часть
+│   ├── Addons/KRa_TosServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
+│   ├── Music/                                  # внешняя библиотека (без PBO!)
+│   │   ├── Type/<плейлист>/track.ogg|mp3|wav   # кассеты (+ meta.txt: name=...)
+│   │   ├── CD/<плейлист>/...                   # диски
+│   │   └── Radio.txt                           # станции: Название = URL
+│   └── tools/serve_music.py                    # HTTP-зеркало Music/ для клиентов
+├── tools/pack_pbo.py            # fallback-упаковщик PBO (без DayZ Tools)
+└── build.ps1                    # сборочный скрипт (Addon Builder → pack_pbo)
 ```
 
-# Готовые артефакты — что скачано и что докачать
+## 🛠 Сборка (по BI-гайду)
 
-В `build_out/` после сборки лежат готовые к раздаче файлы:
+1. Установите **DayZ Tools** (Steam) → **Addon Builder**.
+2. Sources: папка `@Uness` (или `@KRa_TosServer`), Keys: ваш `.biprivatekey`.
+3. Build → получаются `Uness_Data.pbo`, `Uness_Scripts.pbo`,
+   `KRa_TosServerInit.pbo` в `Addons/`.
+4. Без DayZ Tools (только для тестов, PBO не подписаны):
+   `powershell -File build.ps1` или `python3 tools/pack_pbo.py <staging> <out>`.
 
-| Файл | Куда ставить | Статус |
-|---|---|---|
-| `@Unesennye/Unesennye.pbo` | `mods/@Unesennye/` (сервер + клиенты) | ✅ собран (unsigned PBO корректного BI-формата) |
-| `@Unesennye/mpmissions/unesennye.Mission.Enoch.pbo` | `mpmissions/` сервера | ✅ собран |
-| `@UnesennyeServer/UnesennyeServer.pbo` | только на сервер | ✅ собран |
-| `Music/…`, `tools/serve_music.py` | профиль сервера / HTTP-зеркало | ✅ шаблоны готовы |
-| `UE_Bridge/bass_sdk/` (bass.h, bass.lib x86/x64, bass.dll x64) | уже внутри Unesennye.pbo | ✅ скачано с un4seen.com |
+## 🚀 Установка на сервер
 
-### Нужно докачать/собрать вручную
-1. **bass_aac.dll (x64)** — плагин AAC для «Европа+» (.aac-стрим). un4seen.com → BASS add-ons → «AAC», положить в `@Unesennye/Bridges/@Unesennye_Bridge/UE_Bridge/bass_sdk/addon/aac/x64/`. Без него Апекс и ЮморFM (MP3) играют, Европа+ — нет.
-2. **UEAudioBridge.dll** — готовой сборки не существует; собрать из исходников на Windows:
-   - MSVC: открыть «x64 Native Tools Command Prompt for VS» → `@Unesennye\UE_Bridge\build\build_msvc.bat` (BASS SDK уже лежит в `bass_sdk\`);
-   - MinGW: `build_mingw.bat`;
-   - результат (`UEAudioBridge.dll` + скопированный рядом `bass.dll`) раздаётся клиентам через лаунчер/архив мода.
-3. **Подпись PBO ключом** (для `verifySignatures=1`): DayZ Tools (Steam) или `dayzplus_bekeypair` (GitHub Kelson/dayztools):
-   `BeKeyPair.exe create @Unesennye 128` → подписать каждый .pbo → `.bikey` положить в `keys/` сервера и клиентов. Пока подпись не сделана — ставьте `verifySignatures=0` в server.cfg.
-4. **Треки**: `.ogg/.mp3` в `Music/Type/<плейлист>/` и `Music/CD/<плейлист>/` (вне PBO).
+```cpp
+// serverDZ.cfg
+class Mods
+{
+    class Uness { dir = "@Uness";       name = "Uness"; };
+    class KRa_TosServer { dir = "@KRa_TosServer"; name = "Uness Server"; };
+};
+```
 
-> Примечание: релизы armake2/Karel-a на GitHub отдают 404, поэтому в репозитории есть собственный упаковщик native-PBO в `build_pbo.py` — он формирует валидные неподписанные .pbo без внешних утилит.
+* Положите собранные `.pbo` в `<@mod>/Addons/`, `.bikey` — в `keys/` сервера.
+* Внешняя музыка кладется в `<profile>/Music/` — пересборка PBO **не требуется**;
+  сервер сканирует папки при старте и рассылает клиентам манифест.
+* Для докачки треков клиентами запустите `tools/serve_music.py` и пропишите
+  `UE_Config::libraryBaseURL`.
 
-Результат в `build_out/`: `@Unesennye/Unesennye.pbo`,
-`@Unesennye/Missions|mpmissions/unesennye.Mission.Enoch.pbo`,
-`@UnesennyeServer/UnesennyeServer.pbo`, внешние `Music/` и `tools/` — не в PBO.
-Для релиза подпишите PBO (`verifySignatures=1`), `.bikey` → `keys/`.
+## 🎮 Игрок
+
+| Предмет | Действие |
+|---|---|
+| `UE_CassettePlayer` + `UE_Item_Cassette_*` | экшен «Включить музыку (кассета)» |
+| `UE_DiskPlayer` + `UE_Item_Disk_*` | экшен «Включить музыку (диск)» |
+| `UE_RadioReceiver` | «Настроить: Апекс/Европа+/Юмор FM», «Выключить радио» |
+| Машина с флагом `ueCarRadio=1` | «Включить/выключить музыку в машине» |
+
+Команды идут через RPC → **серверная валидация** (`UE_Security`: живость,
+дистанция, доступ к объекту, rate-limit, белый список станций/плейлистов) →
+рассылка всем игрокам в радиусе слышимости.
+
+## 🔐 Защита
+
+Мод не работает на сторонних серверах — двухуровневая защита:
+
+* **Уровень 1 (config):** `Uness_Data` и `Uness_Scripts` объявляют
+  `requiredAddons[] = {..., "KRa_TosServerInit"}` — без @KRa_TosServer клиентский
+  мод не загружается движком, миссия не стартует;
+* **Уровень 2 (script handshake):** `UE_GuardServer.c` (@KRa_TosServer) при старте
+  рассылает клиентам контрольную строку `UNESSED-HS-V1-KRaTos`; `UE_Guard.c`
+  (@Uness) ждёт её в течение grace-периода (`UE_Config::ueGraceSeconds`, по умолчанию 30 с).
+  Если приветствия нет (серверный мод удалён/подменён) — **аварийная остановка
+  сервера** (TriggerShutdown + Error в RPT);
+* `CfgRemoteExec` — allow-list только наших RPC-функций (включая `F_UE_Guard_Handshake`);
+* сервер проверяет существование плейлиста на диске и станции в белом списке;
+* анти-спам и лимит активных источников;
+* подписи PBO обязательны (`verifySignatures = 1`).
+
+## 📄 Лицензия
+
+© 2024–2026 KRa Tos (Константин). Использование — только на сервере «Унесённые».
+Распаковка, модификация, распространение и использование на сторонних серверах запрещены.
