@@ -1,1 +1,10 @@
-(empty)
+# Артефакты сборки и секреты
+*.biprivatekey
+build/staging/
+__pycache__/
+*.pyc
+
+# исходники сборки (staging, логи) — артефакты release/ индексируются явно
+build/*
+!release/
+Uness_build_test.zip
