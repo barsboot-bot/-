@@ -23,6 +23,7 @@ import zlib
 
 HEADER_START = 0x170   # фиксированный размер шапки PBO у Bohemia
 DIGEST_LEN = 0x1CC     # блок подписи/digest в конце unsigned PBO
+SHA1_OFF = 4           # смещение SHA1 внутри digest-блока
 
 
 def verify(path):

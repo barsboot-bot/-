@@ -71,7 +71,9 @@ def pack_pbo(src_dir, dst_pbo):
                                   binascii.crc32(data) & 0xFFFFFFFF,
                                   len(payload), len(data)))
         body += payload
-    entries += b"\x00"
+    # Терминатор header-таблицы: 5 нулевых байт (стандарт BI-PBO / Mikero pboformat).
+    # Addon Builder требует именно 5, иначе при подписи файл отвергается.
+    entries += b"\x00" * 5
     size_header = len(entries)
     size_data = len(body)
     hdr = bytearray(0x170)
