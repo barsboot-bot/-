@@ -60,6 +60,8 @@ class UE_NetworkHandler: ModuleBase
         GetRPCManager().AddRPC("UE_Network", "OnClientStopSource", this, FunccType.serverbc);
         GetRPCManager().AddRPC("UE_Network", "OnClientUpdatePos", this, FunccType.serverbc);
         GetRPCManager().AddRPC("UE_Network", "OnLibraryManifest", this, FunccType.serverown);
+        // handshake серверного аддона (@UnesennyeServer) — защита мода
+        GetRPCManager().AddRPC("UE_Guard", "OnServerHandshake", this, FunccType.serverbc);
         // серверные обработчики входящих запросов от игроков
         GetRPCManager().AddRPC("UE_Network", "CmdPlayCassette", this, FunccType.clientown);
         GetRPCManager().AddRPC("UE_Network", "CmdPlayDisk", this, FunccType.clientown);
