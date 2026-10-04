@@ -243,4 +243,8 @@ class UE_Config
     fadeCurve = 2;              // степень затухания (2 = квадратичное)
     radioBufferMs = 3000;       // буферизация радио-потока
     serverAuthEnabled = 1;      // включать серверную проверку подлинности команд
+    audioBridgeEnabled = 1;     // использовать аудио-прослойку UEAudioBridge.dll (BASS):
+                                // 1 = стримы и внешние треки, 0 = только штатный SoundSource
+    bridgeMasterDb = -6;        // общий уровень моста, дБ
+    bridgeMusicGain = 100;      // усиление канала музыки, %
 };
