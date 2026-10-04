@@ -67,10 +67,35 @@ Music/<...>/meta.txt                       — name = Отображаемое �
 Образец структуры: `@UnesennyeServer/Music/`, зеркало: `@UnesennyeServer/tools/serve_music.py`.
 
 ## Сборка в PBO
+
 ```
-python build_pbo.py          # через armake2 (рекомендуется для продакшена)
-python build_pbo.py --zip    # zip-фолбэк только для локальных тестов
+python build_pbo.py          # → build_out/ (native unsigned PBO, без внешних тулзов)
 ```
+
+# Готовые артефакты — что скачано и что докачать
+
+В `build_out/` после сборки лежат готовые к раздаче файлы:
+
+| Файл | Куда ставить | Статус |
+|---|---|---|
+| `@Unesennye/Unesennye.pbo` | `mods/@Unesennye/` (сервер + клиенты) | ✅ собран (unsigned PBO корректного BI-формата) |
+| `@Unesennye/mpmissions/unesennye.Mission.Enoch.pbo` | `mpmissions/` сервера | ✅ собран |
+| `@UnesennyeServer/UnesennyeServer.pbo` | только на сервер | ✅ собран |
+| `Music/…`, `tools/serve_music.py` | профиль сервера / HTTP-зеркало | ✅ шаблоны готовы |
+| `UE_Bridge/bass_sdk/` (bass.h, bass.lib x86/x64, bass.dll x64) | уже внутри Unesennye.pbo | ✅ скачано с un4seen.com |
+
+### Нужно докачать/собрать вручную
+1. **bass_aac.dll (x64)** — плагин AAC для «Европа+» (.aac-стрим). un4seen.com → BASS add-ons → «AAC», положить в `@Unesennye/UE_Bridge/bass_sdk/addon/aac/x64/`. Без него Апекс и ЮморFM (MP3) играют, Европа+ — нет.
+2. **UEAudioBridge.dll** — готовой сборки не существует; собрать из исходников на Windows:
+   - MSVC: открыть «x64 Native Tools Command Prompt for VS» → `@Unesennye\UE_Bridge\build\build_msvc.bat` (BASS SDK уже лежит в `bass_sdk\`);
+   - MinGW: `build_mingw.bat`;
+   - результат (`UEAudioBridge.dll` + скопированный рядом `bass.dll`) раздаётся клиентам через лаунчер/архив мода.
+3. **Подпись PBO ключом** (для `verifySignatures=1`): DayZ Tools (Steam) или `dayzplus_bekeypair` (GitHub Kelson/dayztools):
+   `BeKeyPair.exe create @Unesennye 128` → подписать каждый .pbo → `.bikey` положить в `keys/` сервера и клиентов. Пока подпись не сделана — ставьте `verifySignatures=0` в server.cfg.
+4. **Треки**: `.ogg/.mp3` в `Music/Type/<плейлист>/` и `Music/CD/<плейлист>/` (вне PBO).
+
+> Примечание: релизы armake2/Karel-a на GitHub отдают 404, поэтому в репозитории есть собственный упаковщик native-PBO в `build_pbo.py` — он формирует валидные неподписанные .pbo без внешних утилит.
+
 Результат в `build_out/`: `@Unesennye/Unesennye.pbo`,
 `@Unesennye/Missions|mpmissions/unesennye.Mission.Enoch.pbo`,
 `@UnesennyeServer/UnesennyeServer.pbo`, внешние `Music/` и `tools/` — не в PBO.

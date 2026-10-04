@@ -48,6 +48,34 @@ def pack_with_armake(exe, src_dir, out_pbo):
     print("[build]", " ".join(cmd))
     subprocess.run(cmd, check=True)
 
+def pack_native_pbo(src_dir, out_pbo):
+    """Корректный не подписанный PBO (BI-формат: header + данные) — работает на DayZ."""
+    import struct, hashlib
+    entries = []
+    data_buf = b""
+    for root, dirs, files in os.walk(src_dir):
+        dirs.sort(); files.sort()
+        for f in files:
+            full = os.path.join(root, f)
+            rel = os.path.relpath(full, src_dir).replace("\\", "/") + "\x00"
+            with open(full, "rb") as fh:
+                c = fh.read()
+            entries.append((rel.encode("utf-8"), len(c), len(data_buf), hashlib.sha1(c).digest()))
+            data_buf += c
+    header = b"\x00\x00\x00"
+    pos = 0
+    for name, size, offset, sha in entries:
+        header += name
+        header += struct.pack("<III", size, 0, offset)
+        header += sha
+        pos += size
+    header += b"\x00"
+    header += struct.pack("<I", 0xFFFFFFFF) + b"\x00" * 4 + struct.pack("<I", 0) + b"\x00" * 20
+    with open(out_pbo, "wb") as o:
+        o.write(header); o.write(data_buf)
+    print("[build] native unsigned PBO:", out_pbo, f"({len(entries)} файлов)")
+
+
 def pack_zip(src_dir, out_pbo):
     """НЕОФИЦИАЛЬНЫЙ zip-контейнер (тесты без BI-тулзов)."""
     with zipfile.ZipFile(out_pbo, "w", zipfile.ZIP_DEFLATED) as z:
@@ -88,7 +116,7 @@ def main():
     os.makedirs(os.path.join(stage_cli, "Missions"))
     os.makedirs(os.path.join(stage_cli, "mpmissions"))
 
-    packer = (lambda s, o: pack_with_armake(exe, s, o)) if exe else pack_zip
+    packer = (lambda s, o: pack_with_armake(exe, s, o)) if exe else pack_native_pbo
 
     # главный PBO клиента
     packer(stage_cli, os.path.join(stage_cli, "Unesennye.pbo"))
