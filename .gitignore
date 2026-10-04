@@ -4,5 +4,7 @@ build/staging/
 __pycache__/
 *.pyc
 
-build/
+# исходники сборки (staging, логи) — артефакты release/ индексируются явно
+build/*
+!release/
 Uness_build_test.zip
