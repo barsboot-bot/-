@@ -42,6 +42,20 @@ def collect(tree_root):
 
 
 def pack_pbo(src_dir, dst_pbo):
+    """Собирает BI-PBO в формате, который принимает Addon Builder.
+
+    Структура заголовка (см. Mikero pboformat / Bohemia PBOTool):
+      0x00  magic   "VBP\\0"
+      0x04  0xFFFFFFFF
+      0x08  reserved = 0            <-- НЕ размер! иначе Addon Builder
+      0x0C  sizeHeader               отвергает файл ("Failed to sign")
+      0x10  sizeData
+      0x14  0
+      ... padding до 0x170
+    Тело: header-записи (папки -> CRC 0xFFFFFFFF, файлы -> CRC+sizePacked+
+    sizeUnpacked, терминатор "\\0"), затем данные, затем пустый digest-блок
+    (0x1CC нулей) для неподписанных PBO.
+    """
     dirs, files = collect(src_dir)
     entries = b""
     body = b""
@@ -56,14 +70,21 @@ def pack_pbo(src_dir, dst_pbo):
                                   binascii.crc32(data) & 0xFFFFFFFF,
                                   len(payload), len(data)))
         body += payload
-    hdr = (b"VBP\x00" + b"\xff\xff\xff\xff"
-           + struct.pack("<I", len(entries) + 1 + len(body))
-           + struct.pack("<I", len(body))
-           + b"\x00\x00\x00\x00")
+    entries += b"\x00"
+    size_header = len(entries)
+    size_data = len(body)
+    hdr = bytearray(0x170)
+    hdr[0:4] = b"VBP\x00"
+    hdr[4:8] = b"\xff\xff\xff\xff"
+    struct.pack_into("<I", hdr, 0x08, 0)              # reserved
+    struct.pack_into("<I", hdr, 0x0C, size_header)    # sizeHeader
+    struct.pack_into("<I", hdr, 0x10, size_data)      # sizeData
+    struct.pack_into("<I", hdr, 0x14, 0)
+    digest_block = b"\x00" * 0x1CC  # неподписанный PBO: пустый digest/сигнатура
     os.makedirs(os.path.dirname(dst_pbo), exist_ok=True)
     with open(dst_pbo, "wb") as f:
-        f.write(hdr + entries + b"\x00" + body)
-    return dst_pbo, len(hdr) + len(entries) + 1 + len(body)
+        f.write(bytes(hdr) + entries + body + digest_block)
+    return dst_pbo, 0x170 + size_header + size_data + len(digest_block)
 
 
 def main():
