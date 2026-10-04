@@ -1,6 +1,9 @@
-# 📼 унесённые | Unesennye — мод музыки для DayZ Standalone
+# 📼 унесённые | Uness — мод музыки для DayZ Standalone
 
 **Версия:** 1.0.0 · **Автор:** KRa Tos (Константин) · **Лицензия:** только сервер «Унесённые»
+
+> **Моды переименованы:** клиентский мод — **@Uness**, серверный — **@UnessServer**
+> (аддоны: `Uness_Data.pbo`, `Uness_Scripts.pbo`, `Uness_ServerInit.pbo`).
 
 Атмосферный музыкальный мод: аудиокассеты, виниловые диски, интернет-радио и
 магнитолы в автомобилях. Звук реалистично затухает с расстоянием — его слышат
@@ -15,11 +18,11 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 ## 📁 Структура репозитория
 
 ```
-├── @Unesennye/                  # КЛИЕНТ + СЕРВЕР (мод-пак)
+├── @Uness/                  # КЛИЕНТ + СЕРВЕР (мод-пак)
 │   ├── Addons/
-│   │   ├── Unesennye_Data/      # config.cpp: CfgPatches, CfgMods, CfgVehicles,
+│   │   ├── Uness_Data/      # config.cpp: CfgPatches, CfgMods, CfgVehicles,
 │   │   │                        #   UE_RadioStations, UE_Config
-│   │   └── Unesennye_Scripts/   # Enforce Script:
+│   │   └── Uness_Scripts/   # Enforce Script:
 │   │       └── scripts/
 │   │           ├── 3_Game/UE_Global.c          # константы (UE_SourceType)
 │   │           ├── 4_World/UE_Module*.c        # экшены предметов (world module)
@@ -29,11 +32,12 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 │   │               ├── UE_Network.c            # RPC-слой (GetRPCManager)
 │   │               ├── UE_MusicLibrary.c       # внешняя библиотека Music/
 │   │               └── UE_Security.c           # серверная валидация команд
-│   ├── Bridges/@Unesennye_Bridge/              # нативный BASS-мост (опционально)
-│   ├── Keys/unessed.bikey                      # публичный ключ подписи
+│   │       └── 5_Mission/UE_Guard.c            # защита: краш без @UnessServer
+│   ├── Bridges/@Uness_Bridge/              # нативный BASS-мост (опционально)
+│   ├── Keys/uness.bikey                      # публичный ключ подписи
 │   └── config.cpp                              # корневой cfgMods/CfgBridges
-├── @UnesennyeServer/            # СЕРВЕРНАЯ часть
-│   ├── Addons/Unesennye_ServerInit/            # CfgRemoteExec allow-list
+├── @UnessServer/            # СЕРВЕРНАЯ часть
+│   ├── Addons/Uness_ServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
 │   ├── Music/                                  # внешняя библиотека (без PBO!)
 │   │   ├── Type/<плейлист>/track.ogg|mp3|wav   # кассеты (+ meta.txt: name=...)
 │   │   ├── CD/<плейлист>/...                   # диски
@@ -46,9 +50,9 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 ## 🛠 Сборка (по BI-гайду)
 
 1. Установите **DayZ Tools** (Steam) → **Addon Builder**.
-2. Sources: папка `@Unesennye` (или `@UnesennyeServer`), Keys: ваш `.biprivatekey`.
-3. Build → получаются `Unesennye_Data.pbo`, `Unesennye_Scripts.pbo`,
-   `Unesennye_ServerInit.pbo` в `Addons/`.
+2. Sources: папка `@Uness` (или `@UnessServer`), Keys: ваш `.biprivatekey`.
+3. Build → получаются `Uness_Data.pbo`, `Uness_Scripts.pbo`,
+   `Uness_ServerInit.pbo` в `Addons/`.
 4. Без DayZ Tools (только для тестов, PBO не подписаны):
    `powershell -File build.ps1` или `python3 tools/pack_pbo.py <staging> <out>`.
 
@@ -58,8 +62,8 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 // serverDZ.cfg
 class Mods
 {
-    class Unesennye { dir = "@Unesennye";       name = "Unesennye"; };
-    class UnesennyeServer { dir = "@UnesennyeServer"; name = "Unesennye Server"; };
+    class Uness { dir = "@Uness";       name = "Uness"; };
+    class UnessServer { dir = "@UnessServer"; name = "Uness Server"; };
 };
 ```
 
@@ -84,7 +88,17 @@ class Mods
 
 ## 🔐 Защита
 
-* `CfgRemoteExec` — allow-list только наших RPC-функций;
+Мод не работает на сторонних серверах — двухуровневая защита:
+
+* **Уровень 1 (config):** `Uness_Data` и `Uness_Scripts` объявляют
+  `requiredAddons[] = {..., "Uness_ServerInit"}` — без @UnessServer клиентский
+  мод не загружается движком, миссия не стартует;
+* **Уровень 2 (script handshake):** `UE_GuardServer.c` (@UnessServer) при старте
+  рассылает клиентам контрольную строку `UNESSED-HS-V1-KRaTos`; `UE_Guard.c`
+  (@Uness) ждёт её в течение grace-периода (`UE_Config::ueGraceSeconds`, по умолчанию 30 с).
+  Если приветствия нет (серверный мод удалён/подменён) — **аварийная остановка
+  сервера** (TriggerShutdown + Error в RPT);
+* `CfgRemoteExec` — allow-list только наших RPC-функций (включая `F_UE_Guard_Handshake`);
 * сервер проверяет существование плейлиста на диске и станции в белом списке;
 * анти-спам и лимит активных источников;
 * подписи PBO обязательны (`verifySignatures = 1`).
