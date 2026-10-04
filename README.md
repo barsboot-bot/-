@@ -34,7 +34,7 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 │   │               └── UE_Security.c           # серверная валидация команд
 │   │       └── 5_Mission/UE_Guard.c            # защита: краш без @KRa_TosServer
 │   ├── Bridges/@Uness_Bridge/              # нативный BASS-мост (опционально)
-│   ├── Keys/uness.bikey                      # публичный ключ подписи
+│   ├── Keys/KRaTos.bikey                      # публичный ключ подписи
 │   └── config.cpp                              # корневой cfgMods/CfgBridges
 ├── @KRa_TosServer/            # СЕРВЕРНАЯ часть
 │   ├── Addons/KRa_TosServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
@@ -50,11 +50,32 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 ## 🛠 Сборка (по BI-гайду)
 
 1. Установите **DayZ Tools** (Steam) → **Addon Builder**.
-2. Sources: папка `@Uness` (или `@KRa_TosServer`), Keys: ваш `.biprivatekey`.
-3. Build → получаются `Uness_Data.pbo`, `Uness_Scripts.pbo`,
-   `KRa_TosServerInit.pbo` в `Addons/`.
-4. Без DayZ Tools (только для тестов, PBO не подписаны):
+2. Sources: папка `@Uness` (или `@KRa_TosServer`).
+3. **Подпись — вашим ключом `KRaTos.biprivatekey`:**
+   Addon Builder → кнопка/вкладка **Signature** → в поле *Private key*
+   выберите **`KRaTos`** (список подхватывает все `.biprivatekey` из папки
+   `...\DayZTools\addons\Keys\`; если ключ с паролем — введите его).
+   ⚠️ Имя ключа в GUI = имя файла без расширения: файл `KRaTos.biprivatekey`
+   отображается как **KRaTos** (не «uness» и не «KRa_TosServerInit»).
+4. Build with signature → получаются подписанные `Uness_Data.pbo`,
+   `Uness_Scripts.pbo`, `KRa_TosServerInit.pbo` в `Addons/`.
+5. Без DayZ Tools (только для тестов, PBO не подписаны):
    `powershell -File build.ps1` или `python3 tools/pack_pbo.py <staging> <out>`.
+6. Автоматическая подпись из скрипта (когда DayZ Tools установлен):
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File build.ps1 -Sign `
+     -KeyName "KRaTos" -KeyDir "C:\...\DayZTools\addons\Keys" -KeyPass "пароль"
+   ```
+   (положите `KRaTos.biprivatekey` в `@Uness\Keys\` — тогда `-KeyDir` не нужен;
+   приватный ключ в git не попадает: `*.biprivatekey` в .gitignore)
+
+### ❌ Частые причины «Failed to sign»
+| Причина | Решение |
+|---|---|
+| В Addon Builder выбран несуществующий ключ (`uness`, `KRa_TosServerInit`) | выбрать **KRaTos** (= ваш `KRaTos.biprivatekey`) |
+| `.biprivatekey` лежит не в папке Keys, указанной в настройках DayZ Tools | Addon Builder → Options → путь к папке ключей; либо переложить `KRaTos.biprivatekey` туда |
+| Ключ защищён паролем, но пароль не введён | ввести пароль в диалоге Signature / `-KeyPass` |
+| PBO собраны python-паковщиком (тестовые) | пересобрать через сам Addon Builder (Build), затем Sign |
 
 ## 🚀 Установка на сервер
 

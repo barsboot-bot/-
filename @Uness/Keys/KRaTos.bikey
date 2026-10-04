@@ -1,0 +1,17 @@
+-----BEGIN BI KEY-----
+ЗАГЛУШКА (placeholder) публичного ключа «KRaTos».
+
+ВАЖНО: это НЕ настоящий .bikey. Замените этот файл НАСТОЯЩИМ
+публичным ключом, который DayZ Tools (Addon Signature) создал
+вместе с вашим приватным KRaTos.biprivatekey.
+
+Как получить настоящий KRaTos.bikey:
+  1. DayZ Tools -> Addon Signature -> Create Key Pair
+     Name of private key: KRaTos   (без расширения!)
+     Password: (если задавали — запомните, он нужен при подписи)
+  2. В папке ...\DayZTools\bin\keys\ появятся:
+       KRaTos.biprivatekey  (ПРИВАТНЫЙ — никуда не выкладывать)
+       KRaTos.bikey         (ПУБЛИЧНЫЙ — вот его кладём сюда)
+  3. Скопируйте KRaTos.bikey в @Uness\Keys\ (репо)
+     и в DayZServer\keys\ (сервер).
+-----END BI KEY-----

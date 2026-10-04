@@ -12,11 +12,22 @@
 #       python-упаковщик (совместимый с vanilla-PBO без бинарей).
 #
 #  Запуск:  powershell -ExecutionPolicy Bypass -File build.ps1
-#           или: dayztools\bin\addonbuilder.exe <workspace> <outdir>
+#           с подписью вашим ключом KRaTos:
+#  powershell -ExecutionPolicy Bypass -File build.ps1 `
+#      -Sign -KeyName "KRaTos" -KeyDir "C:\SteamLibrary\steamapps\common\DayZTools\addons\Keys"
+#  (или просто положите KRaTos.biprivatekey в @Uness\Keys\ рядом с репо)
 # ============================================================
+
+param(
+    [switch]$Sign,                       # подписывать PBO после сборки
+    [string]$KeyName  = "KRaTos",        # имя приватного ключа = KRaTos.biprivatekey
+    [string]$KeyDir   = "",              # папка с .biprivatekey (пусто = @Uness\Keys\)
+    [string]$KeyPass  = ""               # пароль ключа (если задавали при создании)
+)
 
 $ErrorActionPreference = "Stop"
 $Root     = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-not $KeyDir) { $KeyDir = Join-Path $Root "@Uness\Keys" }
 $Staging  = Join-Path $Root "build\staging"
 $OutDir   = Join-Path $Root "build\out\@Uness\Addons"
 $OutSrv   = Join-Path $Root "build\out\@KRa_TosServer\Addons"
@@ -66,6 +77,32 @@ if ($AddonBuilder) {
 
 # --- 3. Ключи и README для релизной папки ---
 New-Item -ItemType Directory -Force -Path "$(Split-Path -Parent $OutDir)\..\Keys" | Out-Null
-Copy-Item (Join-Path $Root "@Uness\Keys\*") "$(Split-Path -Parent $OutDir)\..\Keys\" -Force -ErrorAction SilentlyContinue
+Copy-Item (Join-Path $Root "@Uness\Keys\*.bikey") "$(Split-Path -Parent $OutDir)\..\Keys\" -Force -ErrorAction SilentlyContinue
+
+# --- 4. Подпись PBO ключом KRaTos.biprivatekey (через Arma3PBO/dllsigned из DayZ Tools) ---
+if ($Sign) {
+    $PrivKey = Join-Path $KeyDir "$KeyName.biprivatekey"
+    if (-not (Test-Path $PrivKey)) {
+        Write-Error "НЕ НАЙДЕН приватный ключ: $PrivKey`nПоложите $KeyName.biprivatekey в '$KeyDir' или укажите -KeyDir '<путь>'.`n(Ключ создаётся: DayZ Tools -> Addon Signature -> Create Key Pair, имя 'KRaTos')"
+    }
+    # ищем подписчик DayZ Tools (dllsigned.exe / arma3pbo.exe)
+    $signer = $null
+    foreach ($c in @(
+        (Join-Path $steam "\dllsigned.exe"),
+        (Join-Path $steam "bin\dllsigned.exe"),
+        (Join-Path $steam "-addons\AddonBuilder\dllsigned.exe")
+    )) { if (Test-Path $c) { $signer = $c; break } }
+    if (-not $signer) {
+        Write-Warning "Подписчик dllsigned.exe не найден в '$steam'. Откройте GUI: DayZ Tools -> Addon Builder -> вкладка Signature -> Private key: '$KeyName', Password, OK -> Sign."
+    } else {
+        Write-Host "Подписываем ключом $PrivKey ..." -ForegroundColor Cyan
+        $pwArg = if ($KeyPass) { "-pwd=$KeyPass" } else { "-pwd=" }
+        Get-ChildItem -Recurse (Join-Path $Root "build\out") -Filter *.pbo | ForEach-Object {
+            & $signer $_.FullName $PrivKey $pwArg
+            if ($LASTEXITCODE -ne 0) { Write-Error "Не удалось подписать $($_.Name)" }
+            else { Write-Host "  signed: $($_.Name)" -ForegroundColor Green }
+        }
+    }
+}
 
 Write-Host "готово: $Root\build\out" -ForegroundColor Green

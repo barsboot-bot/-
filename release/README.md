@@ -14,7 +14,7 @@ release/
 │   └── Addons/
 │       └── KRa_TosServerInit.pbo  (2.2 KB — handshake-защита)
 └── Keys/
-    └── uness.bikey                ← публичный ключ (в keys/ сервера)
+    └── KRaTos.bikey                ← публичный ключ (в keys/ сервера)
 ```
 
 ## Установка клиента
@@ -23,7 +23,7 @@ release/
 
 ## Установка сервера
 1. Папку `@KRa_TosServer` положить рядом с `DayZServer.exe`.
-2. `uness.bikey` → в папку `DayZServer\keys\`.
+2. `KRaTos.bikey` → в папку `DayZServer\keys\`.
 3. `serverDZ.cfg`:
    ```
    modDir = "@Uness;@KRa_TosServer";
@@ -42,5 +42,5 @@ release/
 
 ## ⚠️ Важно
 PBO упакованы тестовым паковщиком и **не подписаны**. Для продакшена пересоберите
-и подпишите официальным **Addon Builder (DayZ Tools)** тем же ключом, что `uness.bikey`,
+и подпишите официальным **Addon Builder (DayZ Tools)** ключом `KRaTos.biprivatekey` (Private key: KRaTos),
 либо запустите на сервере параметр `-skipAssestSignatureCheck` только для локального теста.
