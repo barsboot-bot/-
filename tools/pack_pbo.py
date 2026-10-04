@@ -59,10 +59,9 @@ def pack_pbo(src_dir, dst_pbo):
     dirs, files = collect(src_dir)
     entries = b""
     body = b""
-    # папки первыми — так делает Addon Builder
-    for d in sorted(dirs):
-        # BI-PBO directory record: name + CRC(0xFFFFFFFF) + packedSize(0) + unpackedSize(0) = 12 bytes
-        entries += d.encode("cp1250") + b"\x00" + struct.pack("<III", 0xFFFFFFFF, 0, 0)
+    # *** ФАЙЛЫ первыми, ПАПКИ в конце таблицы — канонический порядок
+    # Mikero pboformat / Addon Builder. Папки В НАЧАЛЕ таблицы заставляют
+    # dllsigned спотыкаться и выдавать "Failed to sign".
     for name, data in files:
         comp = zlib.compress(data, 9)
         payload = comp if len(comp) < len(data) else data
@@ -71,8 +70,10 @@ def pack_pbo(src_dir, dst_pbo):
                                   binascii.crc32(data) & 0xFFFFFFFF,
                                   len(payload), len(data)))
         body += payload
-    # Терминатор header-таблицы: 5 нулевых байт (стандарт BI-PBO / Mikero pboformat).
-    # Addon Builder требует именно 5, иначе при подписи файл отвергается.
+    for d in sorted(dirs):
+        # BI-PBO directory record: name + CRC(0xFFFFFFFF) + packedSize(0) + unpackedSize(0) = 12 bytes
+        entries += d.encode("cp1250") + b"\x00" + struct.pack("<III", 0xFFFFFFFF, 0, 0)
+    # Терминатор header-таблицы: пустое имя + 4 нулевых байта (всего 5 нулей).
     entries += b"\x00" * 5
     size_header = len(entries)
     size_data = len(body)
