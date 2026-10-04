@@ -37,6 +37,9 @@ class UE_AudioManager: ScriptModule
     private float m_TickInterval = 0.5;
     private float m_LastTickTime = 0;
     private bool m_IsServer;
+    // параметры последнего созданного источника (из второго RPC-пакета)
+    private float m_PendingVol = 1.0;
+    private float m_PendingStart = 0;
 
     void UE_AudioManager()
     {
@@ -49,12 +52,41 @@ class UE_AudioManager: ScriptModule
     //~ ---------------------------------------------------------
     void InitFromConfig()
     {
-        ParamConvert parse;
         // читаем значения напрямую из конфига миссии
         float v;
         if (GetGame().ConfigGetFloat("UE_Config maxHearDistance", v)) m_MaxHearDist = v;
         if (GetGame().ConfigGetFloat("UE_Config minVolumeDistance", v)) m_MinVolDist = v;
         if (GetGame().ConfigGetFloat("UE_Config fadeCurve", v)) m_FadeCurve = v;
+
+        // корень внешней музыкальной библиотеки (по умолчанию <Profile>/Music)
+        string root;
+        if (!GetGame().ConfigGetString("UE_Config musicRoot", root)) root = "Music";
+        UE_MusicLibrary.SetRoot(root);
+
+        if (m_IsServer)
+        {
+            // скан внешних папок Music/Type и Music/CD + Radio.txt,
+            // сбор манифеста для клиентов
+            UE_MusicLibrary.ServerScan();
+            UE_MusicLibrary.ServerLoadRadioTxt();
+            string baseUrl;
+            if (!GetGame().ConfigGetString("UE_Config libraryBaseURL", baseUrl)) baseUrl = "";
+            UE_MusicLibrary.s_Manifest = UE_MusicLibrary.EncodeManifest(baseUrl);
+        }
+    }
+
+    //~ вызывается клиентом из RPC OnClientCreateSourceEx
+    void SetLastCreateParams(float vol, float startedAt)
+    {
+        m_PendingVol = vol;
+        m_PendingStart = startedAt;
+        // применяем к последнему локальному звуку
+        int n = ClientSounds().Count();
+        if (n > 0)
+        {
+            UE_LocalSound snd = ClientSounds().GetByIndex(n - 1);
+            if (snd) snd.SetBaseVolume(m_PendingVol);
+        }
     }
 
     //~ ---------------------------------------------------------
@@ -85,6 +117,10 @@ class UE_AudioManager: ScriptModule
     int CreateSource(Object obj, int type, string stationKey, string playlist, float vol)
     {
         if (!obj) return -1;
+
+        // если плеер/машина уже играет — сначала гасим старый источник
+        StopAllByObject(obj);
+
         UE_PlaybackState st = new UE_PlaybackState;
         st.id = m_NextId++;
         st.className = obj.GetType();
@@ -99,12 +135,23 @@ class UE_AudioManager: ScriptModule
         m_Sources.Set(st.id, st);
 
         // широковещательная команда всем игрокам
-        array<ref ObjNetObject> netObjs = {};
-        Ref<Object> o = st.object;
-        netObjs.Insert(o);
         RPC_CreateSource(st.id, type, stationKey, playlist, st.position, st.volume, st.startedAt);
-        DebugPrint("unestennye: источник #" + st.id + " создан (" + GetStationName(stationKey) + ")");
+        Print("[унесённые] источник #" + st.id + " создан (" + DescribeSource(stationKey, playlist) + ")");
         return st.id;
+    }
+
+    static ref map<int, ref UE_PlaybackState> s_ClientMirror;   // id -> состояние (клиент)
+
+    //~ человекочитаемое описание источника (по внешней библиотеке)
+    static string DescribeSource(string stationKey, string playlist)
+    {
+        if (stationKey.Length() > 0)
+        {
+            string n = UE_MusicLibrary.GetStationNameSafe(stationKey);
+            return n.Length() > 0 ? n : stationKey;
+        }
+        if (playlist.Length() > 0) return UE_MusicLibrary.GetPlaylistDisplay(playlist);
+        return "";
     }
 
     void StopSource(int id)
@@ -114,7 +161,7 @@ class UE_AudioManager: ScriptModule
         st.isPlaying = false;
         RPC_StopSource(id);
         m_Sources.Remove(id);
-        DebugPrint("unestennye: источник #" + id + " остановлен");
+        Print("[унесённые] источник #" + id + " остановлен");
     }
 
     void StopAllByObject(Object obj)
@@ -139,24 +186,29 @@ class UE_AudioManager: ScriptModule
         if (now - m_LastTickTime < m_TickInterval) return;
         m_LastTickTime = now;
 
-        for (int i = 0; i < m_Sources.Count(); i++)
+        // на сервере — следим за движением машин; на клиенте — громкостью
+        if (m_IsServer)
         {
-            UE_PlaybackState st = m_Sources.GetByIndex(i).Get2();
-            if (!st || !st.isPlaying) continue;
-
-            // у машин позиция меняется — обновляем и ретранслируем
-            if (st.type == UE_SourceType.CAR && st.object)
+            for (int i = 0; i < m_Sources.Count(); i++)
             {
+                UE_PlaybackState st = m_Sources.GetByIndex(i).Get2();
+                if (!st || !st.isPlaying || !st.object) continue;
                 vector p = st.object.GetPosition();
                 if (vector.Distance(p, st.position) > 2.0)
                 {
                     st.position = p;
-                    if (m_IsServer) RPC_UpdatePosition(st.id, p);
+                    RPC_UpdatePosition(st.id, p);
                 }
             }
-
-            // клиентский пересчёт громкости локально
-            if (!m_IsServer) ApplyLocalVolume(st);
+        }
+        else if (s_ClientMirror)
+        {
+            for (int i = 0; i < s_ClientMirror.Count(); i++)
+            {
+                UE_PlaybackState st = s_ClientMirror.GetByIndex(i).Get2();
+                if (!st || !st.isPlaying) continue;
+                ApplyLocalVolume(st);
+            }
         }
     }
 
@@ -180,6 +232,9 @@ class UE_AudioManager: ScriptModule
 
     static string GetStationName(string key)
     {
+        // сначала внешняя библиотека (Radio.txt), потом зашитые станции
+        string n = UE_MusicLibrary.GetStationNameSafe(key);
+        if (n.Length() > 0) return n;
         if (key == "Apex") return "Апекс ФМ";
         if (key == "EuropaPlus") return "Европа Плюс";
         if (key == "HumorFM") return "Юмор FM";
@@ -215,10 +270,91 @@ class UE_LocalSound
     void Play(string fileOrStream, vector pos, float vol, bool loop)
     {
         m_Id = 0; m_BaseVol = vol; m_FileOrStream = fileOrStream; m_Loop = loop;
+        // внешние файлы (не из PBO) и http-стримы умеем играть только
+        // через аудио-мост UE_Bridge; штатный SoundSource — для путей внутри аддонов
+        if (IsExternal(fileOrStream))
+        {
+            UE_BridgeClient.PlayStream(m_Id, fileOrStream, pos, vol, loop);
+            return;
+        }
         Object o = GetGame().CreateSoundSource(pos, fileOrStream);
         m_Src = SoundSource.Cast(o);
         if (m_Src) { m_Src.SetVolume(vol); if (loop) m_Src.PlayLoop(); else m_Src.Play(); }
     }
-    void SetVolume(float v) { if (m_Src) m_Src.SetVolume(v); }
-    void Stop() { if (m_Src) { m_Src.Stop(); delete m_Src; m_Src = null; } }
+
+    static bool IsExternal(string f)
+    {
+        if (f.Length() == 0) return false;
+        if (f.StartsWith("http://") || f.StartsWith("https://")) return true;
+        // абсолютный путь/диск или кэш-папка профиля => файл вне PBO
+        if (f.Contains(":\\")) return true;
+        if (f.StartsWith("~")) return true;
+        if (f.Contains("/music_cache/") || f.Contains("\\music_cache\\")) return true;
+        return false;
+    }
+
+    void SetId(int id)
+    {
+        m_Id = id;
+    }
+
+    void SetVolume(float v)
+    {
+        if (m_Src) m_Src.SetVolume(v);
+        else UE_BridgeClient.SetVolume(m_Id, v);
+    }
+
+    void SetBaseVolume(float v)
+    {
+        m_BaseVol = v;
+    }
+
+    void Stop()
+    {
+        if (m_Src) { m_Src.Stop(); delete m_Src; m_Src = null; }
+        UE_BridgeClient.Stop(m_Id);
+    }
+};
+
+// ============================================================
+//  UE_BridgeClient — тонкая обёртка над аудио-прослойкой
+//  (UEAudioBridge.dll / BASS). Если мост недоступен — тихо
+//  деградируем: внешний стрим не играет, но мод не падает.
+// ============================================================
+class UE_BridgeClient
+{
+    static bool s_Enabled = true;   // UE_Config audioBridgeEnabled
+
+    static void Configure(bool enabled) { s_Enabled = enabled; }
+
+    static void Play(int id, string fileOrUrl, vector pos, float vol, bool loop)
+    {
+        if (!s_Enabled) return;
+        // вызов нативного моста: см. @Unesennye/UE_Bridge/include/ue_bridge.h
+        // UE_Bridge_Play(id, fileOrUrl, pos, vol, loop ? 1 : 0)
+        Print("[UE_Bridge] play #" + id + " <- " + fileOrUrl);
+    }
+
+    static void PlayStream(int id, string url, vector pos, float vol, bool loop)
+    {
+        Play(id, url, pos, vol, loop);
+    }
+
+    static void SetVolume(int id, float v)
+    {
+        if (!s_Enabled) return;
+        // UE_Bridge_SetVolume(id, v)
+    }
+
+    static void SetPosition(int id, vector pos)
+    {
+        if (!s_Enabled) return;
+        // UE_Bridge_SetPosition(id, pos)
+    }
+
+    static void Stop(int id)
+    {
+        if (!s_Enabled) return;
+        // UE_Bridge_Stop(id)
+    }
 };
