@@ -61,7 +61,8 @@ def pack_pbo(src_dir, dst_pbo):
     body = b""
     # папки первыми — так делает Addon Builder
     for d in sorted(dirs):
-        entries += d.encode("cp1250") + b"\x00" + b"\xff\xff\xff\xff"
+        # BI-PBO directory record: name + CRC(0xFFFFFFFF) + packedSize(0) + unpackedSize(0) = 12 bytes
+        entries += d.encode("cp1250") + b"\x00" + struct.pack("<III", 0xFFFFFFFF, 0, 0)
     for name, data in files:
         comp = zlib.compress(data, 9)
         payload = comp if len(comp) < len(data) else data
