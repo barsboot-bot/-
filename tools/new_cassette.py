@@ -78,7 +78,7 @@ def main():
                 url = "https://github.com/KRaTos/Unessed-DayZ-Mod";
                 version = "1.0.0";
                 requiredVersion = 0.1;
-                requiredAddons[] = {{"DZ_Data", "DZ_Scripts", "Uness_Data", "Uness_ServerInit"}};
+                requiredAddons[] = {{"DZ_Data", "DZ_Scripts", "Uness_Data", "KRa_TosServerInit"}};
                 units[] = {{"{cls}"}};
                 weapons[] = {{}};
             }};
@@ -130,7 +130,7 @@ def main():
 
     # --- meta.txt для внешней библиотеки сервера ---
     lib_kind = "Type" if args.type == "tape" else "CD"
-    music_lib = os.path.join(ROOT, "@UnessServer", "Music", lib_kind, cls_suffix)
+    music_lib = os.path.join(ROOT, "@KRa_TosServer", "Music", lib_kind, cls_suffix)
     os.makedirs(music_lib, exist_ok=True)
     with open(os.path.join(music_lib, "meta.txt"), "w", encoding="utf-8") as f:
         f.write(f"name = {args.name}\n")

@@ -1,12 +1,12 @@
 // ============================================================
 //  UE_Guard — техническая защита мода «унесённые»
 //  Сторонние серверы не могут использовать мод без обязательного
-//  серверного аддона @UnessServer (Uness_ServerInit).
+//  серверного аддона @KRa_TosServer (KRa_TosServerInit).
 //
 //  Двухуровневая защита:
 //   УРОВЕНЬ 1 (config.cpp, надёжный): Uness_Data и
 //     Uness_Scripts объявляют requiredAddons[] = {...,
-//     "Uness_ServerInit"}. Без @UnessServer движок не
+//     "KRa_TosServerInit"}. Без @KRa_TosServer движок не
 //     может загрузить клиентский мод -> миссия не стартует.
 //   УРОВЕНЬ 2 (скриптовый handshake): серверный аддон при старте
 //     шлёт всем клиентам RPC-приветствие с контрольной строкой.
@@ -89,7 +89,7 @@ class UE_Guard: ScriptModule
     //~ ----------------------------------------------------------
     void TriggerShutdown()
     {
-        Print("[унесённые][FATAL] Серверный мод @UnessServer не найден!");
+        Print("[унесённые][FATAL] Серверный мод @KRa_TosServer не найден!");
         Print("[унесённые][FATAL] Использование мода на сторонних серверах запрещено (см. LICENSE).");
         Error("UNESSED SECURITY: server mod validation failed, halting.");
         int grace = 30;

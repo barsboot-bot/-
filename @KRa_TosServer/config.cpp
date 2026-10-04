@@ -84,7 +84,7 @@ class CfgVars
 
     // --- Анти-чит / защита ---
     checkModLoad = 1;                   // ОБЯЗАТЕЛЬНОЕ присутствие мода у клиента
-    verifySignatures = 1;               // проверка подписей mod.pbo (@Uness, @UnessServer)
+    verifySignatures = 1;               // проверка подписей mod.pbo (@Uness, @KRa_TosServer)
     battlEyeFilters = 1;
     maxPacketSize = 1400;
     networkIdleTimeout = 300;

@@ -2,8 +2,8 @@
 
 **Версия:** 1.0.0 · **Автор:** KRa Tos (Константин) · **Лицензия:** только сервер «Унесённые»
 
-> **Моды переименованы:** клиентский мод — **@Uness**, серверный — **@UnessServer**
-> (аддоны: `Uness_Data.pbo`, `Uness_Scripts.pbo`, `Uness_ServerInit.pbo`).
+> **Моды переименованы:** клиентский мод — **@Uness**, серверный — **@KRa_TosServer**
+> (аддоны: `Uness_Data.pbo`, `Uness_Scripts.pbo`, `KRa_TosServerInit.pbo`).
 
 Атмосферный музыкальный мод: аудиокассеты, виниловые диски, интернет-радио и
 магнитолы в автомобилях. Звук реалистично затухает с расстоянием — его слышат
@@ -32,12 +32,12 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 │   │               ├── UE_Network.c            # RPC-слой (GetRPCManager)
 │   │               ├── UE_MusicLibrary.c       # внешняя библиотека Music/
 │   │               └── UE_Security.c           # серверная валидация команд
-│   │       └── 5_Mission/UE_Guard.c            # защита: краш без @UnessServer
+│   │       └── 5_Mission/UE_Guard.c            # защита: краш без @KRa_TosServer
 │   ├── Bridges/@Uness_Bridge/              # нативный BASS-мост (опционально)
 │   ├── Keys/uness.bikey                      # публичный ключ подписи
 │   └── config.cpp                              # корневой cfgMods/CfgBridges
-├── @UnessServer/            # СЕРВЕРНАЯ часть
-│   ├── Addons/Uness_ServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
+├── @KRa_TosServer/            # СЕРВЕРНАЯ часть
+│   ├── Addons/KRa_TosServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
 │   ├── Music/                                  # внешняя библиотека (без PBO!)
 │   │   ├── Type/<плейлист>/track.ogg|mp3|wav   # кассеты (+ meta.txt: name=...)
 │   │   ├── CD/<плейлист>/...                   # диски
@@ -50,9 +50,9 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 ## 🛠 Сборка (по BI-гайду)
 
 1. Установите **DayZ Tools** (Steam) → **Addon Builder**.
-2. Sources: папка `@Uness` (или `@UnessServer`), Keys: ваш `.biprivatekey`.
+2. Sources: папка `@Uness` (или `@KRa_TosServer`), Keys: ваш `.biprivatekey`.
 3. Build → получаются `Uness_Data.pbo`, `Uness_Scripts.pbo`,
-   `Uness_ServerInit.pbo` в `Addons/`.
+   `KRa_TosServerInit.pbo` в `Addons/`.
 4. Без DayZ Tools (только для тестов, PBO не подписаны):
    `powershell -File build.ps1` или `python3 tools/pack_pbo.py <staging> <out>`.
 
@@ -63,7 +63,7 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 class Mods
 {
     class Uness { dir = "@Uness";       name = "Uness"; };
-    class UnessServer { dir = "@UnessServer"; name = "Uness Server"; };
+    class KRa_TosServer { dir = "@KRa_TosServer"; name = "Uness Server"; };
 };
 ```
 
@@ -91,9 +91,9 @@ class Mods
 Мод не работает на сторонних серверах — двухуровневая защита:
 
 * **Уровень 1 (config):** `Uness_Data` и `Uness_Scripts` объявляют
-  `requiredAddons[] = {..., "Uness_ServerInit"}` — без @UnessServer клиентский
+  `requiredAddons[] = {..., "KRa_TosServerInit"}` — без @KRa_TosServer клиентский
   мод не загружается движком, миссия не стартует;
-* **Уровень 2 (script handshake):** `UE_GuardServer.c` (@UnessServer) при старте
+* **Уровень 2 (script handshake):** `UE_GuardServer.c` (@KRa_TosServer) при старте
   рассылает клиентам контрольную строку `UNESSED-HS-V1-KRaTos`; `UE_Guard.c`
   (@Uness) ждёт её в течение grace-периода (`UE_Config::ueGraceSeconds`, по умолчанию 30 с).
   Если приветствия нет (серверный мод удалён/подменён) — **аварийная остановка

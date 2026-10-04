@@ -14,12 +14,12 @@ class CfgPatches
         url = "https://github.com/KRaTos/Unessed-DayZ-Mod";
         version = "1.0.0";
         requiredVersion = 0.1;
-        // ЗАЩИТА МОДА: серверный аддон Uness_ServerInit — обязательная
-        // зависимость. Если @UnessServer не установлен на сервере,
+        // ЗАЩИТА МОДА: серверный аддон KRa_TosServerInit — обязательная
+        // зависимость. Если @KRa_TosServer не установлен на сервере,
         // движок не сможет загрузить этот аддон -> миссия не стартует,
         // а по истечении ueGraceSeconds сервер аварийно останавливается
         // (см. scripts/5_Mission/UE_Guard.c).
-        requiredAddons[] = {"DZ_Data", "DZ_Scripts", "Uness_ServerInit"};
+        requiredAddons[] = {"DZ_Data", "DZ_Scripts", "KRa_TosServerInit"};
         units[] = {"UE_CassettePlayer", "UE_DiskPlayer", "UE_RadioReceiver", "UE_CarRadioUnit"};
         weapons[] = {};
     };
@@ -232,10 +232,10 @@ class UE_Config
     bridgeMasterDb = -6;        // общий уровень моста, дБ
     bridgeMusicGain = 100;      // усиление канала музыки, %
 
-    // ========== ЗАЩИТА ОТ ЗАПУСКА БЕЗ @UnessServer ==========
+    // ========== ЗАЩИТА ОТ ЗАПУСКА БЕЗ @KRa_TosServer ==========
     // grace-период (секунды), в течение которого клиентская часть мода
     // ждёт "приветствие" (handshake) от серверного аддона
-    // Uness_ServerInit. Если handshake не получен — серверный мод
+    // KRa_TosServerInit. Если handshake не получен — серверный мод
     // отсутствует / извлечён из pak / переупакован — и сервер аварийно
     // останавливается (см. scripts/5_Mission/UE_Guard.c).
     ueGraceSeconds = 30;        // 0 = graceful shutdown без принудительного краша

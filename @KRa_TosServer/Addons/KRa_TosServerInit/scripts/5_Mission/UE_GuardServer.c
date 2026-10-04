@@ -1,10 +1,10 @@
 // ============================================================
-//  Uness_ServerInit — серверный аддон мода «унесённые».
+//  KRa_TosServerInit — серверный аддон мода «унесённые».
 //  ОБЯЗАТЕЛЕН для работы клиентского @Uness.
 //
 //  Защита мода (почему сторонний сервер без него крашится):
 //   1. requiredAddons в Uness_Data/Uness_Scripts ссылается
-//      на Uness_ServerInit — без него мод не загрузится;
+//      на KRa_TosServerInit — без него мод не загрузится;
 //   2. при старте миссии этот скрипт рассылает всем клиентам
 //      RPC-handshake "UE_Guard.OnServerHandshake";
 //   3. клиентский UE_Guard ждёт handshake grace-период и при его
@@ -17,13 +17,13 @@ modded class MissionServer
     {
         Param1<string> p = new Param1<string>("UNESSED-HS-V1-KRaTos");
         GetRPCManager().SendRPC("UE_Guard", "OnServerHandshake", p, true, null);
-        Print("[UnessServer] guard handshake разослан клиентам.");
+        Print("[KRa_TosServer] guard handshake разослан клиентам.");
     }
 
     override void OnInit()
     {
         super.OnInit();
-        Print("[UnessServer] серверный аддон загружен, v1.0.0");
+        Print("[KRa_TosServer] серверный аддон загружен, v1.0.0");
 
         // handshake сразу + повторим через несколько секунд
         // (клиенты, ещё не дошедшие до OnInit, получат JIP-версию)

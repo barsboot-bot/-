@@ -17,8 +17,8 @@ class CfgPatches
         version = "1.0.0";
         requiredVersion = 0.1;
         // защита мода: прямая зависимость от серверного аддона —
-        // без @UnessServer скрипты не загрузятся даже при обходе Data
-        requiredAddons[] = {"DZ_Data", "DZ_Scripts", "Uness_Data", "Uness_ServerInit"};
+        // без @KRa_TosServer скрипты не загрузятся даже при обходе Data
+        requiredAddons[] = {"DZ_Data", "DZ_Scripts", "Uness_Data", "KRa_TosServerInit"};
         units[] = {};
         weapons[] = {};
     };

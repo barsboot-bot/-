@@ -1,5 +1,5 @@
 // ============================================================
-//  Uness_ServerInit — серверный аддон мода «унесённые»
+//  KRa_TosServerInit — серверный аддон мода «унесённые»
 //  Обязателен: без него сервер не поднимет аудио-RPC.
 //  Проверяет, что у всех подключающихся игроков установлен
 //  клиентский мод (по наличию обработчиков UE_Network).
@@ -7,9 +7,9 @@
 
 class CfgPatches
 {
-    class Uness_ServerInit
+    class KRa_TosServerInit
     {
-        name = "Uness Server Init";
+        name = "KRa Tos Server Init";
         author = "KRa Tos (Konstantin)";
         url = "https://github.com/KRaTos/Unessed-DayZ-Mod";
         version = "1.0.0";
@@ -25,10 +25,10 @@ class CfgPatches
 // missionScriptModule — по стандарту BI «Creating a mod».
 class CfgMods
 {
-    class UnessServer
+    class KRa_TosServer
     {
-        id = "UnessServer";
-        dir = "@UnessServer";
+        id = "KRa_TosServer";
+        dir = "@KRa_TosServer";
         name = "Uness Server";
         picture = "";
         action = "https://github.com/KRaTos/Unessed-DayZ-Mod";
@@ -44,7 +44,7 @@ class CfgMods
             class missionScriptModule
             {
                 value = "";
-                files[] = {"Uness_ServerInit/scripts/5_Mission"};
+                files[] = {"KRa_TosServerInit/scripts/5_Mission"};
             };
         };
     };

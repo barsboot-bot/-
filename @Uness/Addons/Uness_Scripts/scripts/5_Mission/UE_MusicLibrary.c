@@ -27,7 +27,7 @@
 //     библиотеки (параметр libraryBaseURL, пример:
 //     http://<сервер>:8080/Music/) через движковый DownloadFile
 //     и кэширует в <client Profile>/Music/cache.
-//     Зеркало включается скриптом @UnessServer/tools/serve_music.py
+//     Зеркало включается скриптом @KRa_TosServer/tools/serve_music.py
 //     (или любой статикой: nginx, python -m http.server).
 //   * Если качалка недоступна — играет штатным звуком из PBO;
 //     если доступен UE_Bridge (BASS) — играет через мост.

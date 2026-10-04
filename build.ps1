@@ -6,7 +6,7 @@
 #    1. Копирует исходники аддонов в staging-директорию;
 #    2. Упаковывает каждый аддон в .pbo (BI формат:
 #       заголовок "VBP\0" + таблица файлов + zlib-данные);
-#    3. Формирует структуру @Uness / @UnessServer;
+#    3. Формирует структуру @Uness / @KRa_TosServer;
 #    4. (опционально) вызывает Addon Builder из DayZ Tools,
 #       если он установлен — иначе использует встроенный
 #       python-упаковщик (совместимый с vanilla-PBO без бинарей).
@@ -19,7 +19,7 @@ $ErrorActionPreference = "Stop"
 $Root     = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Staging  = Join-Path $Root "build\staging"
 $OutDir   = Join-Path $Root "build\out\@Uness\Addons"
-$OutSrv   = Join-Path $Root "build\out\@UnessServer\Addons"
+$OutSrv   = Join-Path $Root "build\out\@KRa_TosServer\Addons"
 
 Write-Host "== Uness build ==" -ForegroundColor Cyan
 
@@ -30,7 +30,7 @@ New-Item -ItemType Directory -Force -Path $Staging | Out-Null
 $addons = @(
     @{ src = "@Uness\Addons\Uness_Data";     out = $OutDir },
     @{ src = "@Uness\Addons\Uness_Scripts";  out = $OutDir },
-    @{ src = "@UnessServer\Addons\Uness_ServerInit"; out = $OutSrv }
+    @{ src = "@KRa_TosServer\Addons\KRa_TosServerInit"; out = $OutSrv }
 )
 
 foreach ($a in $addons) {
@@ -57,7 +57,7 @@ if ($AddonBuilder) {
     foreach ($dir in Get-ChildItem $Staging -Directory) {
         # выбор выходной папки по имени аддона
         $dest = if ($dir.Name -like "*Server*") { $OutSrv } else { $OutDir }
-        & $AddonBuilder $dir.FullName $dest "-r:=$($Root)\@Uness;prefix;$($Root)\@UnessServer" -wipe -silent -log
+        & $AddonBuilder $dir.FullName $dest "-r:=$($Root)\@Uness;prefix;$($Root)\@KRa_TosServer" -wipe -silent -log
     }
 } else {
     Write-Host "Addon Builder не найден — используем python-упаковщик" -ForegroundColor Yellow
