@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="236" height="410" viewBox="0 0 236 410">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="26" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="bold" fill="#111">Карта памяти ue_memorycard (32.0 x 24.0 x 2.1 мм)</text>
+<text x="20" y="44" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#666">мм, вид снаружи; ось Z (толщина) — вверх</text>
+<text x="70" y="60" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#333">Вид сверху (+Z, наклейка)</text>
+<g transform="translate(70,70)">
+<rect x="0.0" y="0.0" width="256.0" height="192.0" fill="#2f3338" stroke="#444" stroke-width="0.9" />
+<polygon points="228.0,0.0 256.0,28.0 256.0,0.0" fill="white"/>
+<rect x="16.0" y="24.0" width="216.0" height="144.0" fill="#e8e2d2" stroke="#444" stroke-width="0.9" />
+<line x1="0.0" y1="218.0" x2="256.0" y2="218.0" stroke="#888" stroke-width="0.8"/><polygon points="256.0,218.0 251.3,219.7 251.3,216.3" fill="#888"/><line x1="256.0" y1="218.0" x2="0.0" y2="218.0" stroke="#888" stroke-width="0.8"/><polygon points="0.0,218.0 4.7,216.3 4.7,219.7" fill="#888"/><line x1="0.0" y1="218.0" x2="256.0" y2="218.0" stroke="#888" stroke-width="0.8"/><text x="128.0" y="213.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle">32.0</text>
+<line x1="-16.0" y1="0.0" x2="-16.0" y2="192.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,192.0 -17.7,187.3 -14.3,187.3" fill="#888"/><line x1="-16.0" y1="192.0" x2="-16.0" y2="0.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,0.0 -14.3,4.7 -17.7,4.7" fill="#888"/><text x="-22.0" y="96.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 -22.0 96.0)">24.0</text>
+</g>
+<text x="70" y="192" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#333">Вид снизу (-Z, контакты)</text>
+<g transform="translate(70,202)">
+<rect x="0.0" y="0.0" width="256.0" height="192.0" fill="#26292d" stroke="#444" stroke-width="0.9" />
+<rect x="20.0" y="6.4" width="216.0" height="48.0" fill="#c9a227" stroke="#444" stroke-width="0.9" />
+<line x1="0.0" y1="218.0" x2="256.0" y2="218.0" stroke="#888" stroke-width="0.8"/><polygon points="256.0,218.0 251.3,219.7 251.3,216.3" fill="#888"/><line x1="256.0" y1="218.0" x2="0.0" y2="218.0" stroke="#888" stroke-width="0.8"/><polygon points="0.0,218.0 4.7,216.3 4.7,219.7" fill="#888"/><line x1="0.0" y1="218.0" x2="256.0" y2="218.0" stroke="#888" stroke-width="0.8"/><text x="128.0" y="213.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle">32.0</text>
+<line x1="-16.0" y1="0.0" x2="-16.0" y2="192.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,192.0 -17.7,187.3 -14.3,187.3" fill="#888"/><line x1="-16.0" y1="192.0" x2="-16.0" y2="0.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,0.0 -14.3,4.7 -17.7,4.7" fill="#888"/><text x="-22.0" y="96.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 -22.0 96.0)">24.0</text>
+</g>
+<text x="70" y="324" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#333">Вид сбоку (+X)</text>
+<g transform="translate(70,334)">
+<rect x="0.0" y="0.0" width="192.0" height="16.8" fill="#2a2d31" stroke="#444" stroke-width="0.9" />
+<line x1="0.0" y1="42.8" x2="192.0" y2="42.8" stroke="#888" stroke-width="0.8"/><polygon points="192.0,42.8 187.3,44.5 187.3,41.1" fill="#888"/><line x1="192.0" y1="42.8" x2="0.0" y2="42.8" stroke="#888" stroke-width="0.8"/><polygon points="0.0,42.8 4.7,41.1 4.7,44.5" fill="#888"/><line x1="0.0" y1="42.8" x2="192.0" y2="42.8" stroke="#888" stroke-width="0.8"/><text x="96.0" y="37.8" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle">24.0</text>
+<line x1="-16.0" y1="0.0" x2="-16.0" y2="16.8" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,16.8 -17.7,12.1 -14.3,12.1" fill="#888"/><line x1="-16.0" y1="16.8" x2="-16.0" y2="0.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,0.0 -14.3,4.7 -17.7,4.7" fill="#888"/><text x="-22.0" y="8.4" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 -22.0 8.4)">2.1</text>
+</g>
+</svg>

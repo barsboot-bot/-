@@ -1,0 +1,18 @@
+# материалы модели ue_cassette
+# имя материала = имя .rvmat, который надо назначить в Object Builder
+
+newmtl ue_cassette
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.150 0.150 0.150
+Ns 30.0
+map_Kd ../../Models/tex_src/ue_cassette_co.png
+# текстура ue_cassette_co.png: 1024x512 px, в игру идёт .paa (TexView 2)
+
+newmtl ue_plastic
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.150 0.150 0.150
+Ns 30.0
+map_Kd ../../Models/tex_src/ue_plastic_co.png
+# текстура ue_plastic_co.png: 256x256 px, в игру идёт .paa (TexView 2)
