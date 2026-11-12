@@ -17,10 +17,20 @@ Windows и DayZ Tools — они расписаны по кнопкам.
 | Классы предметов, пути к моделям, подмена материала | `@Uness/Addons/Uness_Data/config.cpp` | готово |
 | Чертёж с размерами | `Models/preview/*_draft.svg` | готово |
 | Контрольный рендер (проверить глазами до сборки) | `Models/preview/render_*.png`, `textures_sheet.png` | готово |
+| Готовый архив для Windows | `release/Uness_assets_v1.0.0.zip` | готово |
 | **`.p3d`** (модели) | `@Uness/Addons/Uness_Data/data/` | **только вы, Object Builder** |
 | **`.paa`** (текстуры) | `@Uness/Addons/Uness_Data/data/tex/` | **только вы, TexView 2** |
 
 Габариты, селекшены и материалы — `Models/README.md`.
+
+Если не хочется собирать папки руками, возьмите готовый архив
+`release/Uness_assets_v1.0.0.zip`: там те же исходники, разложенные по
+шагам (`1_MODELS`, `2_TEXTURES`, `3_MATERIALS`, `4_PREVIEW`, `5_IN_GAME`),
+`README_RU.txt` с коротким порядком и `REBUILD_ASSETS.bat` для пересборки
+исходников на Windows. Имена папок в архиве — латиницей, чтобы проводник
+Windows не показывал кракозябры; русский текст — внутри файлов.
+
+Пересобрать архив: `python3 tools/make_assets_zip.py [--version 1.1.0]`.
 
 > Почему `.p3d` и `.paa` не делает скрипт: это бинарные форматы Bohemia
 > (ODOL и PaC). Их пишут только родные инструменты, текстом такой файл не

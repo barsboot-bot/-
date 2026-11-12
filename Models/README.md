@@ -103,6 +103,8 @@ python3 tools/make_models.py        # Models/src/*.obj + *.mtl, чертежи S
 python3 tools/make_textures.py      # Models/tex_src/*.png + контактный лист
 python3 tools/make_rvmat.py         # @Uness/Addons/Uness_Data/data/tex/*.rvmat
 python3 tools/render_preview.py     # Models/preview/render_*.png (контроль глазами)
+python3 tools/check_assets.py       # проверка: геометрия/текстуры/rvmat/config
+python3 tools/make_assets_zip.py    # release/Uness_assets_v1.0.0.zip (раздаточный архив)
 ```
 
 Частичный запуск: `--only cassette`, `--base` / `--albums`, `--dry-run`.

@@ -23,13 +23,14 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import DIM, TEX, MODEL_MATERIAL  # noqa: E402
+from ue_asset_lib import DIM, TEX, MODEL_MATERIAL, layout, project_root  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "Models", "src")
-TEX_SRC = os.path.join(ROOT, "Models", "tex_src")
-DATA_TEX = os.path.join(ROOT, "@Uness", "Addons", "Uness_Data", "data", "tex")
-CONFIG = os.path.join(ROOT, "@Uness", "Addons", "Uness_Data", "config.cpp")
+ROOT = project_root()
+L = layout(ROOT)
+SRC = L["models_src"]
+TEX_SRC = L["tex_src"]
+DATA_TEX = L["data_tex"]
+CONFIG = L["config"]
 ALBUMS = ("rock", "pop", "classic", "dance")
 
 errors = []

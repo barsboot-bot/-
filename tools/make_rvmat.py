@@ -25,10 +25,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import TEX, TILE_MATERIALS, MODEL_MATERIAL  # noqa: E402
+from ue_asset_lib import TEX, TILE_MATERIALS, MODEL_MATERIAL, layout, project_root  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "@Uness", "Addons", "Uness_Data", "data", "tex")
+ROOT = project_root()
+L = layout(ROOT)
+OUT = L["data_tex"]   # @Uness/Addons/Uness_Data/data/tex (в архиве — 3_MATERIALS)
 
 # плейлисты мода -> обложки альбомов (должны совпадать с make_textures.py)
 ALBUMS = ("rock", "pop", "classic", "dance")

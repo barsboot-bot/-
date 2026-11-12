@@ -29,11 +29,12 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ue_asset_lib import (DIM, TEX, uv_rect, PlanarMapper, TileMapper,  # noqa: E402
-                          sub_uv, tex_rect_px)
+                          sub_uv, tex_rect_px, layout, project_root)
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC_DIR = os.path.join(ROOT, "Models", "src")
-PREVIEW_DIR = os.path.join(ROOT, "Models", "preview")
+ROOT = project_root()
+L = layout(ROOT)
+SRC_DIR = L["models_src"]       # Models/src  (в архиве — 1_MODELS)
+PREVIEW_DIR = L["preview"]      # Models/preview (в архиве — 4_PREVIEW)
 
 EPS = 1e-12
 

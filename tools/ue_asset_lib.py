@@ -141,3 +141,74 @@ class TileMapper:
 
     def __call__(self, x, y):
         return (x / self.period, y / self.period)
+
+
+# ==========================================================================
+#  РАСКЛАДКА КАТАЛОГОВ
+# --------------------------------------------------------------------------
+#  Один и тот же код должен работать и в репозитории, и внутри раздаточного
+#  архива (там папки называются 1_MODELS / 2_TEXTURES / 3_MATERIALS / ...,
+#  чтобы Windows-проводник не показывал кракозябры).
+# ==========================================================================
+import os  # noqa: E402
+
+
+def project_root(start=None):
+    """
+    Корень проекта: поднимаемся вверх, пока не найдём характерные папки.
+    Обычно это каталог на уровень выше tools/.
+    """
+    d = os.path.dirname(os.path.abspath(__file__)) if start is None else start
+    marks = ("Models", "1_MODELS", "@Uness", "3_MATERIALS", "release")
+    for _ in range(5):
+        parent = os.path.dirname(d)
+        if not parent or parent == d:
+            break
+        if any(os.path.isdir(os.path.join(parent, m)) for m in marks):
+            return parent
+        d = parent
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def layout(root=None):
+    """
+    Словарь путей проекта. Для каждой сущности перечислены варианты:
+    сначала раскладка репозитория, потом — раздаточного архива.
+    Возвращается первый существующий каталог (или первый вариант, если нет
+    ни одного — тогда скрипт его создаст).
+    """
+    root = root or project_root()
+
+    def pick(*candidates):
+        first = candidates[0]
+        for c in candidates:
+            parts = (c,) if isinstance(c, str) else tuple(c)
+            p = os.path.join(root, *parts)
+            if os.path.isdir(p):
+                return p
+        parts = (first,) if isinstance(first, str) else tuple(first)
+        return os.path.join(root, *parts)
+
+    cfg = os.path.join(root, "@Uness", "Addons", "Uness_Data", "config.cpp")
+    if not os.path.isfile(cfg):
+        alt = os.path.join(root, "5_IN_GAME", "config.cpp")
+        cfg = alt if os.path.isfile(alt) else cfg
+
+    types_xml = os.path.join(root, "server_files", "mpmissions",
+                             "types_uness_assets.xml")
+    if not os.path.isfile(types_xml):
+        alt = os.path.join(root, "5_IN_GAME", "types_uness_assets.xml")
+        types_xml = alt if os.path.isfile(alt) else types_xml
+
+    return {
+        "root": root,
+        "tools": pick("tools"),
+        "models_src": pick(("Models", "src"), "1_MODELS"),
+        "tex_src": pick(("Models", "tex_src"), "2_TEXTURES"),
+        "preview": pick(("Models", "preview"), "4_PREVIEW"),
+        "data": pick(("@Uness", "Addons", "Uness_Data", "data"), "3_MATERIALS"),
+        "data_tex": pick(("@Uness", "Addons", "Uness_Data", "data", "tex"),
+                         "3_MATERIALS"),
+        "config": cfg,
+        "types_xml": types_xml,
+    }

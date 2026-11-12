@@ -39,15 +39,41 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import TEX, tex_rect_px, tex_size  # noqa: E402
+from ue_asset_lib import TEX, tex_rect_px, tex_size, layout, project_root  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEX_SRC = os.path.join(ROOT, "Models", "tex_src")
-PREVIEW = os.path.join(ROOT, "Models", "preview")
+ROOT = project_root()
+L = layout(ROOT)
+TEX_SRC = L["tex_src"]          # Models/tex_src (в архиве — 2_TEXTURES)
+PREVIEW = L["preview"]          # Models/preview (в архиве — 4_PREVIEW)
 
 SEED = 20261112
-FONT_REG = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+# Шрифт с кириллицей ищем по списку: Linux, потом Windows. Переопределяется
+# переменными окружения UE_FONT_REG / UE_FONT_BOLD.
+FONT_SEARCH = (
+    ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf"),            # Linux
+    ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+    ("C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf"),
+    ("C:/Windows/Fonts/tahoma.ttf", "C:/Windows/Fonts/tahomabd.ttf"),
+    ("C:/Windows/Fonts/verdana.ttf", "C:/Windows/Fonts/verdanab.ttf"),
+    ("C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/segoeuib.ttf"),
+)
+
+
+def _resolve_font(bold):
+    env = os.environ.get("UE_FONT_BOLD" if bold else "UE_FONT_REG")
+    if env and os.path.exists(env):
+        return env
+    idx = 1 if bold else 0
+    for pair in FONT_SEARCH:
+        if os.path.exists(pair[idx]):
+            return pair[idx]
+    return None
+
+
+FONT_REG = _resolve_font(False)
+FONT_BOLD = _resolve_font(True)
 
 # Плейлисты мода (совпадают с классами в config.cpp и папками Music/)
 ALBUMS = [
@@ -223,10 +249,18 @@ def ibox(box):
 
 
 def font(size, bold=False):
-    try:
-        return ImageFont.truetype(FONT_BOLD if bold else FONT_REG, int(size))
-    except Exception:
-        return ImageFont.load_default()
+    path = FONT_BOLD if bold else FONT_REG
+    if path:
+        try:
+            return ImageFont.truetype(path, int(size))
+        except Exception:
+            pass
+    # шрифт не нашли — рисуем хоть чем-то, но предупреждаем один раз
+    if not getattr(font, "_warned", False):
+        print("  ! не найден шрифт с кириллицей: надписи на этикетках будут "
+              "заглушкой. Задайте свой: UE_FONT_REG=<путь к .ttf>")
+        font._warned = True
+    return ImageFont.load_default()
 
 
 def fit_text(draw, text, max_w, max_h, bold=False, start=64, min_size=7):

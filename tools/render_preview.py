@@ -23,12 +23,13 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import TILE_MATERIALS  # noqa: E402
+from ue_asset_lib import TILE_MATERIALS, layout, project_root  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "Models", "src")
-TEX_SRC = os.path.join(ROOT, "Models", "tex_src")
-PREVIEW = os.path.join(ROOT, "Models", "preview")
+ROOT = project_root()
+L = layout(ROOT)
+SRC = L["models_src"]
+TEX_SRC = L["tex_src"]
+PREVIEW = L["preview"]
 
 SS = 2  # суперсэмплинг: рендерим в 2x и уменьшаем
 
@@ -200,10 +201,27 @@ def render(V, VT, tris, textures, size=(900, 640), azim=35.0, elev=26.0,
     return im
 
 
+CAPTION_FONTS = (
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "C:/Windows/Fonts/arialbd.ttf",
+    "C:/Windows/Fonts/tahomabd.ttf",
+)
+
+
+def _caption_font(size):
+    for p in CAPTION_FONTS:
+        if os.path.exists(p):
+            try:
+                return ImageFont.truetype(p, size)
+            except Exception:
+                pass
+    return ImageFont.load_default()
+
+
 def add_caption(im, title, sub):
     d = ImageDraw.Draw(im)
-    f = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 17)
-    f2 = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 13)
+    f = _caption_font(17)
+    f2 = _caption_font(13)
     d.text((14, 12), title, font=f, fill=(236, 238, 242))
     d.text((14, 34), sub, font=f2, fill=(150, 156, 166))
     return im
