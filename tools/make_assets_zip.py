@@ -5,13 +5,13 @@ make_assets_zip.py — сборка раздаточного архива с а�
 
 Кладу всё, что нужно художнику/сборщику на Windows, в один ZIP:
 
-    release/Uness_assets_v1.0.0.zip
-    └── Uness_assets_v1.0.0/
+    release/MusicRadio_assets_v1.1.0.zip
+    └── MusicRadio_assets_v1.1.0/
         ├── README_RU.txt          что где лежит и три шага
         ├── REBUILD_ASSETS.bat     пересборка исходников (Python + Pillow)
         ├── 1_MODELS/              .obj + .mtl  (→ Object Builder)
         ├── 2_TEXTURES/            .png _co/_nohq/_smdi (→ TexView 2)
-        ├── 3_MATERIALS/           .rvmat (→ @Uness\Addons\Uness_Data\data\tex)
+        ├── 3_MATERIALS/           .rvmat (→ @MusicRadioCore\Addons\MusicRadioCore\data\tex)
         ├── 4_PREVIEW/             чертежи SVG, рендеры, контактный лист
         ├── 5_IN_GAME/             config.cpp (образец), лут types
         ├── Models_README.md       габариты и селекшены
@@ -39,11 +39,11 @@ RELEASE = os.path.join(ROOT, "release")
 MODELS_SRC = os.path.join(ROOT, "Models", "src")
 TEX_SRC = os.path.join(ROOT, "Models", "tex_src")
 PREVIEW = os.path.join(ROOT, "Models", "preview")
-DATA_TEX = os.path.join(ROOT, "@Uness", "Addons", "Uness_Data", "data", "tex")
-CONFIG = os.path.join(ROOT, "@Uness", "Addons", "Uness_Data", "config.cpp")
+DATA_TEX = os.path.join(ROOT, "@MusicRadioCore", "Addons", "MusicRadioCore", "data", "tex")
+CONFIG = os.path.join(ROOT, "@MusicRadioCore", "Addons", "MusicRadioCore", "config.cpp")
 
 GENERATORS = (
-    "ue_asset_lib.py",
+    "mr_asset_lib.py",
     "make_models.py",
     "make_textures.py",
     "make_rvmat.py",
@@ -54,7 +54,7 @@ GENERATORS = (
 
 README_RU = """\
 =========================================================================
-  Uness ("унесённые") — ассеты носителей музыки
+  MusicRadio ("MusicRadio") — ассеты носителей музыки
   кассета · MiniDisc · карта памяти          версия {version}
 =========================================================================
 
@@ -72,7 +72,7 @@ README_RU = """\
 4_PREVIEW/    чертежи .svg с размерами, контрольные рендеры моделей,
               контактный лист всех текстур.
 5_IN_GAME/    config.cpp — образец классов носителей (в репозитории уже
-              применён) и types_uness_assets.xml — лут для новых предметов.
+              применён) и types_musicradio_assets.xml — лут для новых предметов.
 docs/         полная пошаговая инструкция (17_ASSETS.md).
 tools/        генераторы исходников + REBUILD_ASSETS.bat.
 
@@ -80,9 +80,9 @@ tools/        генераторы исходников + REBUILD_ASSETS.bat.
 ---------------------------------------
 1_MODELS/    <- Models/src/
 2_TEXTURES/  <- Models/tex_src/
-3_MATERIALS/ <- @Uness/Addons/Uness_Data/data/tex/
+3_MATERIALS/ <- @MusicRadioCore/Addons/MusicRadioCore/data/tex/
 4_PREVIEW/   <- Models/preview/
-5_IN_GAME/   <- @Uness/Addons/Uness_Data/config.cpp, server_files/mpmissions/
+5_IN_GAME/   <- @MusicRadioCore/Addons/MusicRadioCore/config.cpp, server_files/mpmissions/
 tools/       <- tools/
 
 
@@ -93,7 +93,7 @@ tools/       <- tools/
    Открыть PNG из 2_TEXTURES -> File -> Save As:
      тип файла : PaC (DirectX)      (это и есть .paa)
      имя       : СОХРАНЯЕМ суффикс  (_co / _nohq / _smdi)
-     папка     : @Uness\\Addons\\Uness_Data\\data\\tex\\
+     папка     : @MusicRadioCore\\Addons\\MusicRadioCore\\data\\tex\\
      сжатие    : _co = DXT1, _nohq = DXT5, _smdi = DXT1
      mipmaps   : ВКЛЮЧИТЬ
    Всего 45 файлов. Быстрее — пакетный режим: File -> Batch Convert,
@@ -108,23 +108,23 @@ tools/       <- tools/
      * LOD-схема: Resolution 0.000, Geometry (коробка по габариту),
        View Geometry (копия корпуса), Memory (точка ce_center),
        Shadow Volume 0.000;
-     * Save As -> @Uness\\Addons\\Uness_Data\\data\\ue_cassette.p3d
-       (и так же ue_minidisc.p3d, ue_memorycard.p3d — имена ровно как
+     * Save As -> @MusicRadioCore\\Addons\\MusicRadioCore\\data\\mr_cassette.p3d
+       (и так же mr_minidisc.p3d, mr_memorycard.p3d — имена ровно как
        в config.cpp).
    Иконка инвентаря — там же: Export -> Icon.
 
 ШАГ 3. Сборка
    powershell -ExecutionPolicy Bypass -File build.ps1
-   В игре: #spawnitem UE_Item_Cassette_Rock
-           #spawnitem UE_Item_MiniDisc_Classic
-           #spawnitem UE_Item_MemoryCard
+   В игре: #spawnitem MR_Item_Cassette_Rock
+           #spawnitem MR_Item_MiniDisc_Classic
+           #spawnitem MR_Item_MemoryCard
 
 
 Классы предметов и габариты
 ---------------------------
-UE_Item_Cassette_Rock, UE_Item_Cassette_Pop     100.0 x 63.8 x 12.0 мм
-UE_Item_MiniDisc_Rock, _Pop, _Classic, _Dance    68.0 x 72.0 x  5.0 мм
-UE_Item_MemoryCard                               32.0 x 24.0 x  2.1 мм
+MR_Item_Cassette_Rock, MR_Item_Cassette_Pop     100.0 x 63.8 x 12.0 мм
+MR_Item_MiniDisc_Rock, _Pop, _Classic, _Dance    68.0 x 72.0 x  5.0 мм
+MR_Item_MemoryCard                               32.0 x 24.0 x  2.1 мм
 
 Селекшены моделей: shell, label, window, cavity, hub_left/right,
 tape_left/right (кассета); shell, shutter, disc, hub, label, cavity (MD);
@@ -148,11 +148,11 @@ shell, label, contacts, switch (карта). Подробно — Models_README.
 
 REBUILD_BAT = r"""@echo off
 rem ============================================================
-rem  Uness - rebuild asset sources (models, textures, materials)
+rem  MusicRadio - rebuild asset sources (models, textures, materials)
 rem  Needs Python 3 and Pillow/numpy. Run from the archive root.
 rem ============================================================
 setlocal
-echo == Uness assets rebuild ==
+echo == MusicRadio assets rebuild ==
 
 where python >nul 2>nul
 if errorlevel 1 (
@@ -228,15 +228,15 @@ def write_text(zf, text, arcname, bom=False):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Сборка архива ассетов Uness")
-    ap.add_argument("--version", default="1.0.0")
+    ap = argparse.ArgumentParser(description="Сборка архива ассетов MusicRadio")
+    ap.add_argument("--version", default="1.1.0")
     ap.add_argument("--out", default=RELEASE)
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
-    arc_root = "Uness_assets_v%s" % args.version
+    arc_root = "MusicRadio_assets_v%s" % args.version
     zip_path = os.path.join(args.out, arc_root + ".zip")
-    tmp = tempfile.mkdtemp(prefix="uness_assets_")
+    tmp = tempfile.mkdtemp(prefix="musicradio_assets_")
 
     try:
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED,
@@ -254,8 +254,8 @@ def main():
             # ---- 5_IN_GAME: конфиг и лут ----
             for p, name in ((CONFIG, "config.cpp"),
                             (os.path.join(ROOT, "server_files", "mpmissions",
-                                          "types_uness_assets.xml"),
-                             "types_uness_assets.xml")):
+                                          "types_musicradio_assets.xml"),
+                             "types_musicradio_assets.xml")):
                 if os.path.exists(p):
                     zf.write(p, "%s/5_IN_GAME/%s" % (arc_root, name))
                     counts["5_IN_GAME"] = counts.get("5_IN_GAME", 0) + 1

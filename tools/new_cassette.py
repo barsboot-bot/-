@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-new_cassette.py — генератор нового носителя мода «унесённые».
+new_cassette.py — генератор нового носителя мода MusicRadio.
 
 1 кассета (или 1 диск) = 1 PBO-аддон. Скрипт создаёт каркас аддона
-Uness_Tape_<slug> с config.cpp (CfgPatches + CfgVehicles),
+MusicRadio_Tape_<slug> с config.cpp (CfgPatches + CfgVehicles),
 заглушкой sound/sample.ogg и meta.txt, а затем упаковывает его
 в .pbo (native BI-формат, tools/pack_pbo.py).
 
@@ -27,8 +27,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 from pack_pbo import pack_pbo  # noqa: E402
 
 BASE_CLASS = {
-    "tape": ("UE_Item_Cassette_Rock", "Кассета"),
-    "disk": ("UE_Item_Disk_Classic", "Диск"),
+    "tape": ("MR_Item_Cassette_Rock", "Кассета"),
+    "disk": ("MR_Item_Disk_Classic", "Диск"),
 }
 
 
@@ -43,17 +43,17 @@ def main():
     ap.add_argument("--type", choices=["tape", "disk"], default="tape")
     ap.add_argument("--name", required=True, help="Отображаемое имя, напр. «Ночной Рок»")
     ap.add_argument("--class", dest="cls", default=None,
-                    help="Имя класса без префикса UE_Item_ (латиницей)")
+                    help="Имя класса без префикса MR_Item_ (латиницей)")
     ap.add_argument("--music-dir", default=None,
                     help="Папка с треками (.ogg/.mp3/.wav). Пусто — будет заглушка.")
-    ap.add_argument("--addon-root", default=os.path.join(ROOT, "@Uness", "Addons"))
-    ap.add_argument("--out", default=os.path.join(ROOT, "build", "out", "@Uness", "Addons"))
+    ap.add_argument("--addon-root", default=os.path.join(ROOT, "@MusicRadioCore", "Addons"))
+    ap.add_argument("--out", default=os.path.join(ROOT, "build", "out", "@MusicRadioCore", "Addons"))
     args = ap.parse_args()
 
     base_class, ru_kind = BASE_CLASS[args.type]
     cls_suffix = args.cls or slugify(args.name)
-    cls = f"UE_Item_{'Cassette' if args.type == 'tape' else 'Disk'}_{cls_suffix}"
-    addon = f"Uness_{'Tape' if args.type == 'tape' else 'Disc'}_{cls_suffix}"
+    cls = f"MR_Item_{'Cassette' if args.type == 'tape' else 'Disk'}_{cls_suffix}"
+    addon = f"MusicRadio_{'Tape' if args.type == 'tape' else 'Disc'}_{cls_suffix}"
 
     src_dir = os.path.join(args.addon_root, addon)
     if os.path.exists(src_dir):
@@ -65,7 +65,7 @@ def main():
         // ============================================================
         //  {addon} — {'аудиокассета' if args.type == 'tape' else 'виниловый диск'}
         //  «{args.name}». 1 носитель = 1 PBO.
-        //  Наследует базовый предмет из Uness_Data; добавляет
+        //  Наследует базовый предмет из MusicRadioCore; добавляет
         //  собственный SoundSource и привязку к плейлисту Music/.
         // ============================================================
 
@@ -76,9 +76,9 @@ def main():
                 name = "{args.name}";
                 author = "KRa Tos (Konstantin)";
                 url = "https://github.com/KRaTos/Unessed-DayZ-Mod";
-                version = "1.0.0";
+                version = "1.1.0";
                 requiredVersion = 0.1;
-                requiredAddons[] = {{"DZ_Data", "DZ_Scripts", "Uness_Data", "KRa_TosServerInit"}};
+                requiredAddons[] = {{"DZ_Data", "DZ_Scripts", "MusicRadioCore", "MusicRadioServerInit"}};
                 units[] = {{"{cls}"}};
                 weapons[] = {{}};
             }};
@@ -86,7 +86,7 @@ def main():
 
         class CfgVehicles
         {{
-            class {base_class};   // базовый класс-носитель из Uness_Data
+            class {base_class};   // базовый класс-носитель из MusicRadioCore
 
             class {cls}: {base_class}
             {{
@@ -108,7 +108,7 @@ def main():
             {{
                 name = "{cls}_Sound";
                 sound[] = {{"sound\\sample.ogg", 0, 1}};
-                distance[] = {{0, 150, 160}};   // затухание до 150 м (UE_Config::maxHearDistance)
+                distance[] = {{0, 150, 160}};   // затухание до 150 м (MR_Config::maxHearDistance)
             }};
         }};
     """)
@@ -130,7 +130,7 @@ def main():
 
     # --- meta.txt для внешней библиотеки сервера ---
     lib_kind = "Type" if args.type == "tape" else "CD"
-    music_lib = os.path.join(ROOT, "@KRa_TosServer", "Music", lib_kind, cls_suffix)
+    music_lib = os.path.join(ROOT, "@MusicRadioServer", "Music", lib_kind, cls_suffix)
     os.makedirs(music_lib, exist_ok=True)
     with open(os.path.join(music_lib, "meta.txt"), "w", encoding="utf-8") as f:
         f.write(f"name = {args.name}\n")
@@ -144,7 +144,7 @@ def main():
     print(f"  1. Замените sound/*.ogg реальными треками при необходимости.")
     print(f"  2. Положите аудиофайлы в {music_lib} (внешняя библиотека).")
     print(f"  3. Подпишите {addon}.pbo через DayZ Tools -> Addon Builder.")
-    print(f"  4. Обновите список юнитов в @Uness/config.cpp (units[]/weapons[]) при желании.")
+    print(f"  4. Обновите список юнитов в @MusicRadioCore/config.cpp (units[]/weapons[]) при желании.")
 
 
 if __name__ == "__main__":

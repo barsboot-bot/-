@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="523" viewBox="0 0 440 523">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="26" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="bold" fill="#111">Компакт-кассета mr_cassette (100.0 x 63.8 x 12.0 мм)</text>
+<text x="20" y="44" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#666">мм, вид снаружи; ось Z (толщина) — вверх</text>
+<text x="70" y="60" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#333">Вид сверху (+Z, сторона этикетки)</text>
+<g transform="translate(70,70)">
+<rect x="0.0" y="0.0" width="300.0" height="191.4" fill="#e9e6df" stroke="#444" stroke-width="0.9" />
+<rect x="51.0" y="59.7" width="198.0" height="78.0" fill="#2b2f33" stroke="#444" stroke-width="0.9" />
+<rect x="18.0" y="4.2" width="264.0" height="51.0" fill="#f6f2e6" stroke="#444" stroke-width="0.9" />
+<circle cx="86.4" cy="98.7" r="22.8" fill="none" stroke="#7a7a7a" stroke-width="0.8"/>
+<circle cx="213.6" cy="98.7" r="22.8" fill="none" stroke="#7a7a7a" stroke-width="0.8"/>
+<circle cx="12.0" cy="13.2" r="1.6" fill="#9a9a9a"/>
+<circle cx="12.0" cy="178.2" r="1.6" fill="#9a9a9a"/>
+<circle cx="288.0" cy="13.2" r="1.6" fill="#9a9a9a"/>
+<circle cx="288.0" cy="178.2" r="1.6" fill="#9a9a9a"/>
+<circle cx="150.0" cy="11.7" r="1.6" fill="#9a9a9a"/>
+<line x1="0.0" y1="217.4" x2="300.0" y2="217.4" stroke="#888" stroke-width="0.8"/><polygon points="300.0,217.4 295.3,219.1 295.3,215.7" fill="#888"/><line x1="300.0" y1="217.4" x2="0.0" y2="217.4" stroke="#888" stroke-width="0.8"/><polygon points="0.0,217.4 4.7,215.7 4.7,219.1" fill="#888"/><line x1="0.0" y1="217.4" x2="300.0" y2="217.4" stroke="#888" stroke-width="0.8"/><text x="150.0" y="212.4" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle">100.0</text>
+<line x1="-16.0" y1="0.0" x2="-16.0" y2="191.4" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,191.4 -17.7,186.7 -14.3,186.7" fill="#888"/><line x1="-16.0" y1="191.4" x2="-16.0" y2="0.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,0.0 -14.3,4.7 -17.7,4.7" fill="#888"/><text x="-22.0" y="95.7" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 -22.0 95.7)">63.8</text>
+</g>
+<text x="70" y="311" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#333">Вид спереди (+Y)</text>
+<g transform="translate(70,321)">
+<rect x="0.0" y="0.0" width="300.0" height="36.0" fill="#dcd8d0" stroke="#444" stroke-width="0.9" />
+<line x1="0.0" y1="62.0" x2="300.0" y2="62.0" stroke="#888" stroke-width="0.8"/><polygon points="300.0,62.0 295.3,63.7 295.3,60.3" fill="#888"/><line x1="300.0" y1="62.0" x2="0.0" y2="62.0" stroke="#888" stroke-width="0.8"/><polygon points="0.0,62.0 4.7,60.3 4.7,63.7" fill="#888"/><line x1="0.0" y1="62.0" x2="300.0" y2="62.0" stroke="#888" stroke-width="0.8"/><text x="150.0" y="57.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle">100.0</text>
+<line x1="-16.0" y1="0.0" x2="-16.0" y2="36.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,36.0 -17.7,31.3 -14.3,31.3" fill="#888"/><line x1="-16.0" y1="36.0" x2="-16.0" y2="0.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,0.0 -14.3,4.7 -17.7,4.7" fill="#888"/><text x="-22.0" y="18.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 -22.0 18.0)">12.0</text>
+</g>
+<text x="70" y="407" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#333">Вид сбоку (+X)</text>
+<g transform="translate(70,417)">
+<rect x="0.0" y="0.0" width="191.4" height="36.0" fill="#dcd8d0" stroke="#444" stroke-width="0.9" />
+<line x1="0.0" y1="62.0" x2="191.4" y2="62.0" stroke="#888" stroke-width="0.8"/><polygon points="191.4,62.0 186.7,63.7 186.7,60.3" fill="#888"/><line x1="191.4" y1="62.0" x2="0.0" y2="62.0" stroke="#888" stroke-width="0.8"/><polygon points="0.0,62.0 4.7,60.3 4.7,63.7" fill="#888"/><line x1="0.0" y1="62.0" x2="191.4" y2="62.0" stroke="#888" stroke-width="0.8"/><text x="95.7" y="57.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle">63.8</text>
+<line x1="-16.0" y1="0.0" x2="-16.0" y2="36.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,36.0 -17.7,31.3 -14.3,31.3" fill="#888"/><line x1="-16.0" y1="36.0" x2="-16.0" y2="0.0" stroke="#888" stroke-width="0.8"/><polygon points="-16.0,0.0 -14.3,4.7 -17.7,4.7" fill="#888"/><text x="-22.0" y="18.0" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 -22.0 18.0)">12.0</text>
+</g>
+</svg>

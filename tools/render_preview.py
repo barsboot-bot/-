@@ -23,7 +23,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import TILE_MATERIALS, layout, project_root  # noqa: E402
+from mr_asset_lib import TILE_MATERIALS, layout, project_root  # noqa: E402
 
 ROOT = project_root()
 L = layout(ROOT)
@@ -228,14 +228,14 @@ def add_caption(im, title, sub):
 
 
 MODELS = [
-    ("cassette", "Кассета ue_cassette", "100.0 x 63.8 x 12.0 мм"),
-    ("minidisc", "MiniDisc ue_minidisc", "68.0 x 72.0 x 5.0 мм"),
-    ("memorycard", "Карта памяти ue_memorycard", "32.0 x 24.0 x 2.1 мм"),
+    ("cassette", "Кассета mr_cassette", "100.0 x 63.8 x 12.0 мм"),
+    ("minidisc", "MiniDisc mr_minidisc", "68.0 x 72.0 x 5.0 мм"),
+    ("memorycard", "Карта памяти mr_memorycard", "32.0 x 24.0 x 2.1 мм"),
 ]
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Превью-рендер моделей Uness")
+    ap = argparse.ArgumentParser(description="Превью-рендер моделей MusicRadio")
     ap.add_argument("--only", choices=[m[0] for m in MODELS])
     ap.add_argument("--azim", type=float, default=38.0)
     ap.add_argument("--elev", type=float, default=28.0)
@@ -258,14 +258,14 @@ def main():
     for key, title, sub in MODELS:
         if args.only and key != args.only:
             continue
-        obj = os.path.join(SRC, "ue_%s.obj" % key)
+        obj = os.path.join(SRC, "mr_%s.obj" % key)
         V, VT, tris = load_obj(obj)
         mats = sorted({m for _, m, _ in tris})
         textures = {m: tex_for(m) for m in mats}
         im = render(V, VT, tris, textures, size=(820, 560),
                     azim=args.azim, elev=args.elev)
         add_caption(im, title, sub)
-        out = os.path.join(PREVIEW, "render_ue_%s%s.png" %
+        out = os.path.join(PREVIEW, "render_mr_%s%s.png" %
                            (key, "_" + args.album if args.album else ""))
         im.save(out)
         shots.append((out, im))

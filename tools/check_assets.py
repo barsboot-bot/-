@@ -23,7 +23,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import DIM, TEX, MODEL_MATERIAL, layout, project_root  # noqa: E402
+from mr_asset_lib import DIM, TEX, MODEL_MATERIAL, layout, project_root  # noqa: E402
 
 ROOT = project_root()
 L = layout(ROOT)
@@ -112,7 +112,7 @@ def check_obj(name):
 # ------------------------------------------------------------ 2. текстуры
 def check_material(mat):
     if mat not in TEX:
-        err("материал `%s` не описан в tools/ue_asset_lib.py" % mat)
+        err("материал `%s` не описан в tools/mr_asset_lib.py" % mat)
         return
     for suf in ("_co", "_nohq", "_smdi"):
         p = os.path.join(TEX_SRC, mat + suf + ".png")
@@ -121,10 +121,10 @@ def check_material(mat):
                 % (mat, suf))
     rv = os.path.join(DATA_TEX, mat + ".rvmat")
     if not os.path.exists(rv):
-        err("нет материала: @Uness/Addons/Uness_Data/data/tex/%s.rvmat "
+        err("нет материала: @MusicRadioCore/Addons/MusicRadioCore/data/tex/%s.rvmat "
             "(запустите tools/make_rvmat.py)" % mat)
     else:
-        refs = re.findall(r"(Uness_Data\\data\\tex\\[\w]+\.paa)",
+        refs = re.findall(r"(MusicRadioCore\\data\\tex\\[\w]+\.paa)",
                           open(rv, encoding="utf-8", errors="ignore").read())
         if len(refs) != 3:
             err("%s.rvmat: ожидалось 3 ссылки на .paa, найдено %d" % (mat, len(refs)))
@@ -179,8 +179,8 @@ def check_config():
     if depth != 0:
         err("config.cpp: не закрыто скобок: %d" % depth)
 
-    # модели: model = "Uness_Data\data\<name>.p3d"
-    for m in re.finditer(r'model\s*=\s*"Uness_Data\\data\\([\w]+)\.p3d"', code):
+    # модели: model = "MusicRadioCore\data\<name>.p3d"
+    for m in re.finditer(r'model\s*=\s*"MusicRadioCore\\data\\([\w]+)\.p3d"', code):
         name = m.group(1)
         if not os.path.exists(os.path.join(SRC, name + ".obj")):
             err('config.cpp: модель "%s.p3d" не имеет исходника Models/src/%s.obj' % (name, name))
@@ -188,7 +188,7 @@ def check_config():
             ok("config.cpp -> модель %s.p3d (исходник есть)" % name)
 
     # материалы из hiddenSelectionsMaterials
-    for m in re.finditer(r"Uness_Data\\data\\tex\\([\w]+)\.rvmat", code):
+    for m in re.finditer(r"MusicRadioCore\\data\\tex\\([\w]+)\.rvmat", code):
         rv = m.group(1)
         if not os.path.exists(os.path.join(DATA_TEX, rv + ".rvmat")):
             err("config.cpp: %s.rvmat не найден в data/tex" % rv)
@@ -196,9 +196,9 @@ def check_config():
             err("config.cpp: у %s.rvmat нет текстуры-исходника" % rv)
 
     # классы, которые ждут скрипты
-    need = ("UE_Item_Cassette_Rock", "UE_Item_Cassette_Pop",
-            "UE_Item_Disk_Classic", "UE_Item_Disk_Dance",
-            "UE_Item_MemoryCard")
+    need = ("MR_Item_Cassette_Rock", "MR_Item_Cassette_Pop",
+            "MR_Item_Disk_Classic", "MR_Item_Disk_Dance",
+            "MR_Item_MemoryCard")
     for cls in need:
         if not re.search(r"class\s+%s\s*:" % cls, code):
             err("config.cpp: нет класса %s (его ищут скрипты)" % cls)
@@ -213,7 +213,7 @@ def main():
     # обложки альбомов
     missing = []
     for a in ALBUMS:
-        for pre in ("ue_cassette_%s" % a, "ue_minidisc_%s" % a):
+        for pre in ("mr_cassette_%s" % a, "mr_minidisc_%s" % a):
             for suf in ("_co", "_nohq", "_smdi"):
                 if not os.path.exists(os.path.join(TEX_SRC, pre + suf + ".png")):
                     missing.append(pre + suf + ".png")

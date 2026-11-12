@@ -4,7 +4,7 @@
 make_rvmat.py — генератор материалов (.rvmat) для моделей носителей.
 
 `.rvmat` — это текстовый файл, поэтому он создаётся скриптом: на каждый
-материал из Models/tex_src/ пишется файл в @Uness/Addons/Uness_Data/data/tex/,
+материал из Models/tex_src/ пишется файл в @MusicRadioCore/Addons/MusicRadioCore/data/tex/,
 который ссылается на сконвертированные `.paa` по пути ВНУТРИ PBO.
 
 Схема карт — стандартная для DayZ:
@@ -25,30 +25,30 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import TEX, TILE_MATERIALS, MODEL_MATERIAL, layout, project_root  # noqa: E402
+from mr_asset_lib import TEX, TILE_MATERIALS, MODEL_MATERIAL, layout, project_root  # noqa: E402
 
 ROOT = project_root()
 L = layout(ROOT)
-OUT = L["data_tex"]   # @Uness/Addons/Uness_Data/data/tex (в архиве — 3_MATERIALS)
+OUT = L["data_tex"]   # @MusicRadioCore/Addons/MusicRadioCore/data/tex (в архиве — 3_MATERIALS)
 
 # плейлисты мода -> обложки альбомов (должны совпадать с make_textures.py)
 ALBUMS = ("rock", "pop", "classic", "dance")
 
-PBO = "Uness_Data"
+PBO = "MusicRadioCore"
 
 # блики по материалу: металл блестит сильно, бумага — почти нет
 SPEC = {
-    "ue_cassette": (0.22, 34.0),
-    "ue_minidisc": (0.30, 44.0),
-    "ue_memorycard": (0.34, 40.0),
-    "ue_plastic": (0.26, 28.0),
-    "ue_metal": (0.85, 62.0),
-    "ue_paper": (0.06, 12.0),
-    "ue_disc": (0.95, 78.0),
+    "mr_cassette": (0.22, 34.0),
+    "mr_minidisc": (0.30, 44.0),
+    "mr_memorycard": (0.34, 40.0),
+    "mr_plastic": (0.26, 28.0),
+    "mr_metal": (0.85, 62.0),
+    "mr_paper": (0.06, 12.0),
+    "mr_disc": (0.95, 78.0),
 }
 
 TEMPLATE = """// {name}.rvmat — СГЕНЕРИРИРОВАНО tools/make_rvmat.py, не править руками.
-// Материал модели носителя мода «унесённые» (Uness).
+// Материал модели носителя мода MusicRadio (MusicRadio).
 // Ссылки на .paa — по пути внутри PBO {pbo}, поэтому имя мода на сервере
 // может быть любым, а пути остаются валидными.
 //
@@ -135,7 +135,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     names = list(TEX.keys())
     for alb in ALBUMS:
-        names += ["ue_cassette_%s" % alb, "ue_minidisc_%s" % alb]
+        names += ["mr_cassette_%s" % alb, "mr_minidisc_%s" % alb]
     for n in sorted(set(names)):
         print("[ok] %s" % write(n))
 
