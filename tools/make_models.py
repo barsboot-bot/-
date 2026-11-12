@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-make_models.py — генератор 3D-геометрии носителей мода «унесённые» (Uness, DayZ).
+make_models.py — генератор 3D-геометрии носителей мода MusicRadio (MusicRadio, DayZ).
 
 Что получается на выходе:
 
-    Models/src/ue_cassette.obj/.mtl      компакт-кассета  100.0 x 63.8 x 12.0 мм
-    Models/src/ue_minidisc.obj/.mtl      MiniDisc-картридж 68.0 x 72.0 x  5.0 мм
-    Models/src/ue_memorycard.obj/.mtl    SD-карта          32.0 x 24.0 x  2.1 мм
+    Models/src/mr_cassette.obj/.mtl      компакт-кассета  100.0 x 63.8 x 12.0 мм
+    Models/src/mr_minidisc.obj/.mtl      MiniDisc-картридж 68.0 x 72.0 x  5.0 мм
+    Models/src/mr_memorycard.obj/.mtl    SD-карта          32.0 x 24.0 x  2.1 мм
     Models/preview/<model>_draft.svg     чертёж в трёх проекциях с размерами
 
 Про .p3d честно: ODOL — бинарный формат Bohemia, его пишет только Object Builder
@@ -28,7 +28,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import (DIM, TEX, uv_rect, PlanarMapper, TileMapper,  # noqa: E402
+from mr_asset_lib import (DIM, TEX, uv_rect, PlanarMapper, TileMapper,  # noqa: E402
                           sub_uv, tex_rect_px, layout, project_root)
 
 ROOT = project_root()
@@ -78,7 +78,7 @@ class Mesh:
 
     def write_obj(self, path):
         lines = [
-            "# %s — модель мода «унесённые» (Uness) для DayZ" % self.name,
+            "# %s — модель мода MusicRadio (MusicRadio) для DayZ" % self.name,
             "# единицы: метры; оси: X вправо, Y в глубину, Z вверх",
             "# импорт в Object Builder: File -> Import -> Wavefront (.obj), МАСШТАБ 1.0",
             "# имена групп (g) = именованные селекшены в .p3d",
@@ -432,42 +432,42 @@ def gear(mesh, group, mat, cx, cy, z0, z1, r_out, r_in, teeth=12, seg_uv=None):
 #  МОДЕЛЬ 1: КОМПАКТ-КАССЕТА
 # ==========================================================================
 def build_cassette():
-    d = DIM['ue_cassette']
+    d = DIM['mr_cassette']
     W, D, T = d['w'], d['d'], d['t']
     z0, z1 = -T / 2.0, T / 2.0
-    m = Mesh("ue_cassette")
+    m = Mesh("mr_cassette")
 
-    top_map = PlanarMapper('ue_cassette', 'top', -W / 2, W / 2, -D / 2, D / 2)
-    bot_map = PlanarMapper('ue_cassette', 'bottom', -W / 2, W / 2, -D / 2, D / 2,
+    top_map = PlanarMapper('mr_cassette', 'top', -W / 2, W / 2, -D / 2, D / 2)
+    bot_map = PlanarMapper('mr_cassette', 'bottom', -W / 2, W / 2, -D / 2, D / 2,
                            flip_u=True)
 
     # окно (вырез в верхней крышке) — сквозь него видны катушки с плёнкой
     win = (-0.0330, -0.0140, 0.0330, 0.0120)
 
     # --- корпус ---
-    prism(m, "shell", "ue_cassette", W, D, z0, z1,
+    prism(m, "shell", "mr_cassette", W, D, z0, z1,
           r=0.0020, seg=6, bevel=0.0006,
           uvfn_top=top_map, uvfn_bot=bot_map,
-          rect_side_long=uv_rect('ue_cassette', 'side_long'),
-          rect_side_short=uv_rect('ue_cassette', 'side_short'),
+          rect_side_long=uv_rect('mr_cassette', 'side_long'),
+          rect_side_short=uv_rect('mr_cassette', 'side_short'),
           hole_top=win)
 
     # --- внутренняя полость окна: пол + стенки (катушки лежат в глубине) ---
     floor_z = 0.0030
-    cavity(m, "cavity", "ue_cassette", win[0], win[2], win[1], win[3],
-           floor_z, z1, uv_rect('ue_cassette', 'tape'),
-           PlanarMapper('ue_cassette', 'tape', win[0], win[2], win[1], win[3]))
+    cavity(m, "cavity", "mr_cassette", win[0], win[2], win[1], win[3],
+           floor_z, z1, uv_rect('mr_cassette', 'tape'),
+           PlanarMapper('mr_cassette', 'tape', win[0], win[2], win[1], win[3]))
 
     # --- рулоны плёнки (левый полный, правый — наполовину смотан) ---
     for name, cx, r in (("tape_left", -0.0212, 0.0178), ("tape_right", 0.0212, 0.0128)):
-        tm = PlanarMapper('ue_cassette', 'tape', cx - r, cx + r,
+        tm = PlanarMapper('mr_cassette', 'tape', cx - r, cx + r,
                           -0.0010 - r, -0.0010 + r)
-        cylinder(m, name, "ue_cassette", cx, -0.0010, floor_z, 0.0046, r, seg=32,
-                 uvr=uv_rect('ue_cassette', 'tape'), uvfn_cap=tm)
+        cylinder(m, name, "mr_cassette", cx, -0.0010, floor_z, 0.0046, r, seg=32,
+                 uvr=uv_rect('mr_cassette', 'tape'), uvfn_cap=tm)
 
     # --- ступицы (зубчатые катушки) — строго под стеклом ---
     for name, cx in (("hub_left", -0.0212), ("hub_right", 0.0212)):
-        gear(m, name, "ue_plastic", cx, -0.0010, 0.0042, 0.0052,
+        gear(m, name, "mr_plastic", cx, -0.0010, 0.0042, 0.0052,
              r_out=0.0076, r_in=0.0062, teeth=12)
 
     # --- стекло окна: рамка по периметру, середина открыта — видно катушки ---
@@ -475,14 +475,14 @@ def build_cassette():
     #  под прозрачным стеклом, а селекшен `window` остаётся для материала)
     gz = 0.0054
     gi = (win[0] + 0.0030, win[1] + 0.0025, win[2] - 0.0030, win[3] - 0.0025)
-    plate(m, "window", "ue_cassette", win[0], win[2], win[1], gi[1], gz, top_map)
-    plate(m, "window", "ue_cassette", win[0], win[2], gi[3], win[3], gz, top_map)
-    plate(m, "window", "ue_cassette", win[0], gi[0], gi[1], gi[3], gz, top_map)
-    plate(m, "window", "ue_cassette", gi[2], win[2], gi[1], gi[3], gz, top_map)
+    plate(m, "window", "mr_cassette", win[0], win[2], win[1], gi[1], gz, top_map)
+    plate(m, "window", "mr_cassette", win[0], win[2], gi[3], win[3], gz, top_map)
+    plate(m, "window", "mr_cassette", win[0], gi[0], gi[1], gi[3], gz, top_map)
+    plate(m, "window", "mr_cassette", gi[2], win[2], gi[1], gi[3], gz, top_map)
 
     # --- бумажная этикетка (чуть выше корпуса: читается как наклейка) ---
     lab = (-0.0440, 0.0135, 0.0440, 0.0305)
-    plate(m, "label", "ue_cassette", lab[0], lab[2], lab[1], lab[3],
+    plate(m, "label", "mr_cassette", lab[0], lab[2], lab[1], lab[3],
           z1 + 0.0002, top_map, facing=+1)
 
     return m, dict(win=win, label=lab)
@@ -492,13 +492,13 @@ def build_cassette():
 #  МОДЕЛЬ 2: MINIDISC
 # ==========================================================================
 def build_minidisc():
-    d = DIM['ue_minidisc']
+    d = DIM['mr_minidisc']
     W, D, T = d['w'], d['d'], d['t']
     z0, z1 = -T / 2.0, T / 2.0
-    m = Mesh("ue_minidisc")
+    m = Mesh("mr_minidisc")
 
-    top_map = PlanarMapper('ue_minidisc', 'top', -W / 2, W / 2, -D / 2, D / 2)
-    bot_map = PlanarMapper('ue_minidisc', 'bottom', -W / 2, W / 2, -D / 2, D / 2,
+    top_map = PlanarMapper('mr_minidisc', 'top', -W / 2, W / 2, -D / 2, D / 2)
+    bot_map = PlanarMapper('mr_minidisc', 'bottom', -W / 2, W / 2, -D / 2, D / 2,
                            flip_u=True)
 
     # окно чтения/записи: по центру, чуть ниже середины корпуса.
@@ -507,34 +507,34 @@ def build_minidisc():
     win = (-0.0210, -0.0170, 0.0210, 0.0030)
 
     # --- корпус со срезанным углом (у MD один угол скошен) ---
-    prism(m, "shell", "ue_minidisc", W, D, z0, z1,
+    prism(m, "shell", "mr_minidisc", W, D, z0, z1,
           r=0.0030, seg=6, cut_corner=(1, 1), cut=0.0060, bevel=0.0004,
           uvfn_top=top_map, uvfn_bot=bot_map,
-          rect_side_long=uv_rect('ue_minidisc', 'side'),
-          rect_side_short=uv_rect('ue_minidisc', 'side'),
+          rect_side_long=uv_rect('mr_minidisc', 'side'),
+          rect_side_short=uv_rect('mr_minidisc', 'side'),
           hole_top=win)
 
     # --- полость под окном: пол + стенки (верхней грани нет) ---
     floor_z = 0.0009
     tile = TileMapper(0.012)
-    cavity(m, "cavity", "ue_plastic", win[0], win[2], win[1], win[3],
-           floor_z, z1, uv_rect('ue_plastic', 'tile'), tile)
+    cavity(m, "cavity", "mr_plastic", win[0], win[2], win[1], win[3],
+           floor_z, z1, uv_rect('mr_plastic', 'tile'), tile)
 
     # --- диск, видимый в окне (целиком внутри картриджа) ---
     disc = lambda x, y: (0.5 + (x - 0.0) / 0.060, 0.5 + (y + 0.0050) / 0.060)
-    cylinder(m, "disc", "ue_disc", 0.0, -0.0050, floor_z, floor_z + 0.0002,
+    cylinder(m, "disc", "mr_disc", 0.0, -0.0050, floor_z, floor_z + 0.0002,
              0.0300, seg=48, uvr=(0.0, 0.0, 1.0, 1.0), uvfn_cap=disc,
              caps=(False, True))
-    cylinder(m, "hub", "ue_metal", 0.0, -0.0050, floor_z + 0.0002, floor_z + 0.0008,
-             0.0055, seg=20, uvr=uv_rect('ue_metal', 'tile'))
+    cylinder(m, "hub", "mr_metal", 0.0, -0.0050, floor_z + 0.0002, floor_z + 0.0008,
+             0.0055, seg=20, uvr=uv_rect('mr_metal', 'tile'))
 
     # --- металлическая шторка: прикрывает верхнюю часть окна ---
-    box(m, "shutter", "ue_metal", -0.0230, 0.0230, -0.0010, 0.0110,
-        z1, z1 + 0.0004, uvr=uv_rect('ue_metal', 'tile'))
+    box(m, "shutter", "mr_metal", -0.0230, 0.0230, -0.0010, 0.0110,
+        z1, z1 + 0.0004, uvr=uv_rect('mr_metal', 'tile'))
 
     # --- этикетка ---
     lab = (-0.0300, 0.0130, 0.0300, 0.0330)
-    plate(m, "label", "ue_minidisc", lab[0], lab[2], lab[1], lab[3],
+    plate(m, "label", "mr_minidisc", lab[0], lab[2], lab[1], lab[3],
           z1 + 0.0002, top_map, facing=+1)
 
     return m, dict(win=win, label=lab)
@@ -544,37 +544,37 @@ def build_minidisc():
 #  МОДЕЛЬ 3: КАРТА ПАМЯТИ (SD)
 # ==========================================================================
 def build_memorycard():
-    d = DIM['ue_memorycard']
+    d = DIM['mr_memorycard']
     W, D, T = d['w'], d['d'], d['t']
     z0, z1 = -T / 2.0, T / 2.0
-    m = Mesh("ue_memorycard")
+    m = Mesh("mr_memorycard")
 
-    top_map = PlanarMapper('ue_memorycard', 'label', -W / 2, W / 2, -D / 2, D / 2)
+    top_map = PlanarMapper('mr_memorycard', 'label', -W / 2, W / 2, -D / 2, D / 2)
     tile = TileMapper(0.012)
 
     # --- корпус со срезанным углом ---
-    bot_map = PlanarMapper('ue_memorycard', 'side', -W / 2, W / 2, -D / 2, D / 2)
-    prism(m, "shell", "ue_memorycard", W, D, z0, z1,
+    bot_map = PlanarMapper('mr_memorycard', 'side', -W / 2, W / 2, -D / 2, D / 2)
+    prism(m, "shell", "mr_memorycard", W, D, z0, z1,
           r=0.0008, seg=4, cut_corner=(1, 1), cut=0.0035, bevel=0.00015,
           uvfn_top=top_map, uvfn_bot=bot_map,
-          rect_side_long=uv_rect('ue_memorycard', 'side'),
-          rect_side_short=uv_rect('ue_memorycard', 'side'))
+          rect_side_long=uv_rect('mr_memorycard', 'side'),
+          rect_side_short=uv_rect('mr_memorycard', 'side'))
 
     # --- наклейка с маркировкой ---
     lab = (-0.0140, -0.0090, 0.0130, 0.0090)
-    plate(m, "label", "ue_memorycard", lab[0], lab[2], lab[1], lab[3],
+    plate(m, "label", "mr_memorycard", lab[0], lab[2], lab[1], lab[3],
           z1 + 0.00005, top_map, facing=+1)
 
     # --- контактная площадка (на нижней стороне, у дальней кромки) ---
     cont = (-0.0135, -0.0112, 0.0135, -0.0052)
-    cont_map = PlanarMapper('ue_memorycard', 'contacts',
+    cont_map = PlanarMapper('mr_memorycard', 'contacts',
                             cont[0], cont[2], cont[1], cont[3])
-    plate(m, "contacts", "ue_memorycard", cont[0], cont[2], cont[1], cont[3],
+    plate(m, "contacts", "mr_memorycard", cont[0], cont[2], cont[1], cont[3],
           z0 - 0.00003, cont_map, facing=-1)
 
     # --- переключатель защиты от записи ---
-    box(m, "switch", "ue_plastic", -W / 2 - 0.0002, -W / 2 + 0.0001,
-        -0.0045, 0.0020, -0.0007, 0.0007, uvr=uv_rect('ue_plastic', 'tile'))
+    box(m, "switch", "mr_plastic", -W / 2 - 0.0002, -W / 2 + 0.0001,
+        -0.0045, 0.0020, -0.0007, 0.0007, uvr=uv_rect('mr_plastic', 'tile'))
 
     return m, dict(label=lab, contacts=cont)
 
@@ -650,7 +650,7 @@ def write_draft(path, title, mm, views):
 
 
 def draft_cassette(path, extra):
-    d = DIM['ue_cassette']
+    d = DIM['mr_cassette']
     W, D, T = d['w'] * 1000, d['d'] * 1000, d['t'] * 1000
     s = 3.0
     win = [v * 1000 for v in extra['win']]
@@ -687,7 +687,7 @@ def draft_cassette(path, extra):
     side.append(_dim_h(0, D * s, T * s + 26, "%.1f" % D))
     side.append(_dim_v(0, T * s, -16, "%.1f" % T))
 
-    write_draft(path, "Компакт-кассета ue_cassette (%s x %s x %s мм)" %
+    write_draft(path, "Компакт-кассета mr_cassette (%s x %s x %s мм)" %
                 (W, D, T), (W, D, T),
                 [("Вид сверху (+Z, сторона этикетки)", W, D, top),
                  ("Вид спереди (+Y)", W, T, front),
@@ -695,7 +695,7 @@ def draft_cassette(path, extra):
 
 
 def draft_minidisc(path, extra):
-    d = DIM['ue_minidisc']
+    d = DIM['mr_minidisc']
     W, D, T = d['w'] * 1000, d['d'] * 1000, d['t'] * 1000
     s = 4.0
     win = [v * 1000 for v in extra['win']]
@@ -722,7 +722,7 @@ def draft_minidisc(path, extra):
     side.append(_dim_h(0, D * s, T * s + 26, "%.1f" % D))
     side.append(_dim_v(0, T * s, -16, "%.1f" % T))
 
-    write_draft(path, "MiniDisc ue_minidisc (%s x %s x %s мм)" % (W, D, T),
+    write_draft(path, "MiniDisc mr_minidisc (%s x %s x %s мм)" % (W, D, T),
                 (W, D, T),
                 [("Вид сверху (+Z, сторона шторки)", W, D, top),
                  ("Вид спереди (+Y)", W, T, front),
@@ -730,7 +730,7 @@ def draft_minidisc(path, extra):
 
 
 def draft_memorycard(path, extra):
-    d = DIM['ue_memorycard']
+    d = DIM['mr_memorycard']
     W, D, T = d['w'] * 1000, d['d'] * 1000, d['t'] * 1000
     s = 8.0
     lab = [v * 1000 for v in extra['label']]
@@ -757,7 +757,7 @@ def draft_memorycard(path, extra):
     side.append(_dim_h(0, D * s, T * s + 26, "%.1f" % D))
     side.append(_dim_v(0, T * s, -16, "%.1f" % T))
 
-    write_draft(path, "Карта памяти ue_memorycard (%s x %s x %s мм)" % (W, D, T),
+    write_draft(path, "Карта памяти mr_memorycard (%s x %s x %s мм)" % (W, D, T),
                 (W, D, T),
                 [("Вид сверху (+Z, наклейка)", W, D, top),
                  ("Вид снизу (-Z, контакты)", W, D, back),
@@ -775,7 +775,7 @@ BUILDERS = {
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Генератор моделей носителей Uness")
+    ap = argparse.ArgumentParser(description="Генератор моделей носителей MusicRadio")
     ap.add_argument("--only", choices=list(BUILDERS), help="только одна модель")
     args = ap.parse_args()
 
@@ -786,7 +786,7 @@ def main():
     for key in todo:
         builder, drafter = BUILDERS[key]
         mesh, extra = builder()
-        name = "ue_%s" % key
+        name = "mr_%s" % key
         obj_path = os.path.join(SRC_DIR, name + ".obj")
         mesh.write_obj(obj_path)
         mesh.write_mtl(os.path.join(SRC_DIR, name + ".mtl"))

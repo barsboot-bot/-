@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-make_textures.py — процедурные текстуры носителей мода «унесённые» (Uness, DayZ).
+make_textures.py — процедурные текстуры носителей мода MusicRadio (MusicRadio, DayZ).
 
 Никаких скачанных картинок: всё рисуется кодом (numpy + Pillow), поэтому
 лицензия чистая, а результат воспроизводим (фиксированный seed).
@@ -13,13 +13,13 @@ make_textures.py — процедурные текстуры носителей 
     <mat>_smdi.png  блики (specular)    -> в .paa как DXT1
 
 Материалы:
-    ue_cassette     1024x512  кассета (лицо + оборот + торцы + плёнка)
-    ue_minidisc     1024x512  MD-картридж (шторка + этикетка)
-    ue_memorycard    256x256  SD-карта (наклейка + контакты)
-    ue_plastic       256x256  тайловый пластик (катушки, корпус карты)
-    ue_metal         256x256  тайловый металл (шторка MD)
-    ue_paper         256x256  тайловая бумага (этикетки)
-    ue_disc          256x256  диск MD (радужные кольца)
+    mr_cassette     1024x512  кассета (лицо + оборот + торцы + плёнка)
+    mr_minidisc     1024x512  MD-картридж (шторка + этикетка)
+    mr_memorycard    256x256  SD-карта (наклейка + контакты)
+    mr_plastic       256x256  тайловый пластик (катушки, корпус карты)
+    mr_metal         256x256  тайловый металл (шторка MD)
+    mr_paper         256x256  тайловая бумага (этикетки)
+    mr_disc          256x256  диск MD (радужные кольца)
 
 Отдельно рисуются ОБЛОЖКИ АЛЬБОМОВ: на каждый плейлист мода — свой комплект
 кассеты и MD (имя альбома напечатано прямо на этикетке).
@@ -39,7 +39,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ue_asset_lib import TEX, tex_rect_px, tex_size, layout, project_root  # noqa: E402
+from mr_asset_lib import TEX, tex_rect_px, tex_size, layout, project_root  # noqa: E402
 
 ROOT = project_root()
 L = layout(ROOT)
@@ -49,7 +49,7 @@ PREVIEW = L["preview"]          # Models/preview (в архиве — 4_PREVIEW)
 SEED = 20261112
 
 # Шрифт с кириллицей ищем по списку: Linux, потом Windows. Переопределяется
-# переменными окружения UE_FONT_REG / UE_FONT_BOLD.
+# переменными окружения MR_FONT_REG / MR_FONT_BOLD.
 FONT_SEARCH = (
     ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf"),            # Linux
     ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -62,7 +62,7 @@ FONT_SEARCH = (
 
 
 def _resolve_font(bold):
-    env = os.environ.get("UE_FONT_BOLD" if bold else "UE_FONT_REG")
+    env = os.environ.get("MR_FONT_BOLD" if bold else "MR_FONT_REG")
     if env and os.path.exists(env):
         return env
     idx = 1 if bold else 0
@@ -258,7 +258,7 @@ def font(size, bold=False):
     # шрифт не нашли — рисуем хоть чем-то, но предупреждаем один раз
     if not getattr(font, "_warned", False):
         print("  ! не найден шрифт с кириллицей: надписи на этикетках будут "
-              "заглушкой. Задайте свой: UE_FONT_REG=<путь к .ttf>")
+              "заглушкой. Задайте свой: MR_FONT_REG=<путь к .ttf>")
         font._warned = True
     return ImageFont.load_default()
 
@@ -878,7 +878,7 @@ def tile_disc(w=256, h=256):
 #  СБОРКА МАТЕРИАЛОВ
 # ==========================================================================
 def build_cassette_mat(album=None, dry=False, out=None):
-    m = Material("ue_cassette", (52, 54, 58), 0.20)
+    m = Material("mr_cassette", (52, 54, 58), 0.20)
     img, hgt, shn = cassette_top(album)
     m.paste("top", img, hgt, shn)
     img, hgt, shn = cassette_bottom(album)
@@ -893,7 +893,7 @@ def build_cassette_mat(album=None, dry=False, out=None):
 
 
 def build_minidisc_mat(album=None, dry=False, out=None):
-    m = Material("ue_minidisc", (176, 180, 184), 0.24)
+    m = Material("mr_minidisc", (176, 180, 184), 0.24)
     img, hgt, shn = minidisc_top(album)
     m.paste("top", img, hgt, shn)
     img, hgt, shn = minidisc_bottom(album)
@@ -904,7 +904,7 @@ def build_minidisc_mat(album=None, dry=False, out=None):
 
 
 def build_memorycard_mat(dry=False, out=None):
-    m = Material("ue_memorycard", (48, 52, 57), 0.28)
+    m = Material("mr_memorycard", (48, 52, 57), 0.28)
     img, hgt, shn = memorycard_label()
     m.paste("label", img, hgt, shn)
     img, hgt, shn = memorycard_contacts()
@@ -955,7 +955,7 @@ def contact_sheet(path, names):
 #  MAIN
 # ==========================================================================
 def main():
-    ap = argparse.ArgumentParser(description="Генератор текстур носителей Uness")
+    ap = argparse.ArgumentParser(description="Генератор текстур носителей MusicRadio")
     ap.add_argument("--base", action="store_true", help="только общие материалы")
     ap.add_argument("--albums", action="store_true", help="только обложки альбомов")
     ap.add_argument("--dry-run", action="store_true", help="ничего не писать")
@@ -970,10 +970,10 @@ def main():
         written += build_cassette_mat(None, args.dry_run)
         written += build_minidisc_mat(None, args.dry_run)
         written += build_memorycard_mat(args.dry_run)
-        written += build_tile("ue_plastic", tile_plastic, args.dry_run)
-        written += build_tile("ue_metal", tile_metal, args.dry_run)
-        written += build_tile("ue_paper", tile_paper, args.dry_run)
-        written += build_tile("ue_disc", tile_disc, args.dry_run)
+        written += build_tile("mr_plastic", tile_plastic, args.dry_run)
+        written += build_tile("mr_metal", tile_metal, args.dry_run)
+        written += build_tile("mr_paper", tile_paper, args.dry_run)
+        written += build_tile("mr_disc", tile_disc, args.dry_run)
 
     if do_all or args.albums:
         for a in ALBUMS:

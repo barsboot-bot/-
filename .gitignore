@@ -7,4 +7,4 @@ __pycache__/
 # исходники сборки (staging, логи) — артефакты release/ индексируются явно
 build/*
 !release/
-Uness_build_test.zip
+MusicRadio_build_test.zip

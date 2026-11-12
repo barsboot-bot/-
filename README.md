@@ -1,9 +1,9 @@
-# 📼 унесённые | Uness — мод музыки для DayZ Standalone
+# 📼 MusicRadio — мод музыки для DayZ Standalone
 
-**Версия:** 1.0.0 · **Автор:** KRa Tos (Константин) · **Лицензия:** только сервер «Унесённые»
+**Версия:** 1.1.0 · **Автор:** KRa Tos (Константин) · **Лицензия:** только сервер «Унесённые»
 
-> **Моды переименованы:** клиентский мод — **@Uness**, серверный — **@KRa_TosServer**
-> (аддоны: `Uness_Data.pbo`, `Uness_Scripts.pbo`, `KRa_TosServerInit.pbo`).
+> **Моды переименованы:** клиентский мод — **@MusicRadioCore**, серверный — **@MusicRadioServer**
+> (аддоны: `MusicRadioCore.pbo`, `MusicRadioScripts.pbo`, `MusicRadioServerInit.pbo`).
 
 Атмосферный музыкальный мод: аудиокассеты, виниловые диски, интернет-радио и
 магнитолы в автомобилях. Звук реалистично затухает с расстоянием — его слышат
@@ -18,30 +18,30 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 ## 📁 Структура репозитория
 
 ```
-├── @Uness/                  # КЛИЕНТ + СЕРВЕР (мод-пак)
+├── @MusicRadioCore/                  # КЛИЕНТ + СЕРВЕР (мод-пак)
 │   ├── Addons/
-│   │   ├── Uness_Data/      # config.cpp: CfgPatches, CfgMods, CfgVehicles,
-│   │   │                        #   UE_RadioStations, UE_Config
-│   │   └── Uness_Scripts/   # Enforce Script:
+│   │   ├── MusicRadioCore/      # config.cpp: CfgPatches, CfgMods, CfgVehicles,
+│   │   │                        #   MR_RadioStations, MR_Config
+│   │   └── MusicRadioScripts/   # Enforce Script:
 │   │       └── scripts/
-│   │           ├── 3_Game/UE_Global.c          # константы (UE_SourceType)
-│   │           ├── 4_World/UE_Module*.c        # экшены предметов (world module)
+│   │           ├── 3_Game/MR_Global.c          # константы (MR_SourceType)
+│   │           ├── 4_World/MR_Module*.c        # экшены предметов (world module)
 │   │           └── 5_Mission/                  # миссия-модуль:
 │   │               ├── MissionServer.c         # точка входа (modded MissionServer)
-│   │               ├── UE_AudioManager.c       # ядро звука + затухание
-│   │               ├── UE_Network.c            # RPC-слой (GetRPCManager)
-│   │               ├── UE_MusicLibrary.c       # внешняя библиотека Music/
-│   │               └── UE_Security.c           # серверная валидация команд
-│   │       └── 5_Mission/UE_Guard.c            # защита: краш без @KRa_TosServer
+│   │               ├── MR_AudioManager.c       # ядро звука + затухание
+│   │               ├── MR_Network.c            # RPC-слой (GetRPCManager)
+│   │               ├── MR_MusicLibrary.c       # внешняя библиотека Music/
+│   │               └── MR_Security.c           # серверная валидация команд
+│   │       └── 5_Mission/MR_Guard.c            # защита: краш без @MusicRadioServer
 │   ├── Bridges/@Uness_Bridge/              # нативный BASS-мост (опционально)
-│   ├── Keys/uness.bikey                      # публичный ключ подписи
+│   ├── Keys/musicradio.bikey                      # публичный ключ подписи
 │   └── config.cpp                              # корневой cfgMods/CfgBridges
 ├── Models/                  # АССЕТЫ (исходники моделей и текстур)
 │   ├── src/*.obj *.mtl      # геометрия в метрах, с именованными селекшенами
 │   ├── tex_src/*.png        # _co / _nohq / _smdi + обложки альбомов
 │   └── preview/             # чертежи SVG, контактный лист, рендеры
-├── @KRa_TosServer/            # СЕРВЕРНАЯ часть
-│   ├── Addons/KRa_TosServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
+├── @MusicRadioServer/            # СЕРВЕРНАЯ часть
+│   ├── Addons/MusicRadioServerInit/            # CfgRemoteExec allow-list + MR_GuardServer.c (handshake)
 │   ├── Music/                                  # внешняя библиотека (без PBO!)
 │   │   ├── Type/<плейлист>/track.ogg|mp3|wav   # кассеты (+ meta.txt: name=...)
 │   │   ├── CD/<плейлист>/...                   # диски
@@ -58,14 +58,14 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 
 | Модель | Габарит | Класс предмета |
 |--------|---------|----------------|
-| `ue_cassette.p3d` | 100.0 × 63.8 × 12.0 мм | `UE_Item_Cassette_Rock`, `UE_Item_Cassette_Pop` |
-| `ue_minidisc.p3d` | 68.0 × 72.0 × 5.0 мм | `UE_Item_MiniDisc_Rock` / `_Pop` / `_Classic` / `_Dance` |
-| `ue_memorycard.p3d` | 32.0 × 24.0 × 2.1 мм | `UE_Item_MemoryCard` |
+| `mr_cassette.p3d` | 100.0 × 63.8 × 12.0 мм | `MR_Item_Cassette_Rock`, `MR_Item_Cassette_Pop` |
+| `mr_minidisc.p3d` | 68.0 × 72.0 × 5.0 мм | `MR_Item_MiniDisc_Rock` / `_Pop` / `_Classic` / `_Dance` |
+| `mr_memorycard.p3d` | 32.0 × 24.0 × 2.1 мм | `MR_Item_MemoryCard` |
 
 ```bash
 python3 tools/make_models.py      # .obj + .mtl + чертежи SVG
 python3 tools/make_textures.py    # .png (_co/_nohq/_smdi) + обложки альбомов
-python3 tools/make_rvmat.py       # .rvmat в @Uness/Addons/Uness_Data/data/tex/
+python3 tools/make_rvmat.py       # .rvmat в @MusicRadioCore/Addons/MusicRadioCore/data/tex/
 python3 tools/render_preview.py   # превью-рендер для проверки глазами
 ```
 
@@ -76,9 +76,9 @@ python3 tools/render_preview.py   # превью-рендер для прове�
 ## 🛠 Сборка (по BI-гайду)
 
 1. Установите **DayZ Tools** (Steam) → **Addon Builder**.
-2. Sources: папка `@Uness` (или `@KRa_TosServer`), Keys: ваш `.biprivatekey`.
-3. Build → получаются `Uness_Data.pbo`, `Uness_Scripts.pbo`,
-   `KRa_TosServerInit.pbo` в `Addons/`.
+2. Sources: папка `@MusicRadioCore` (или `@MusicRadioServer`), Keys: ваш `.biprivatekey`.
+3. Build → получаются `MusicRadioCore.pbo`, `MusicRadioScripts.pbo`,
+   `MusicRadioServerInit.pbo` в `Addons/`.
 4. Без DayZ Tools (только для тестов, PBO не подписаны):
    `powershell -File build.ps1` или `python3 tools/pack_pbo.py <staging> <out>`.
 
@@ -88,8 +88,8 @@ python3 tools/render_preview.py   # превью-рендер для прове�
 // serverDZ.cfg
 class Mods
 {
-    class Uness { dir = "@Uness";       name = "Uness"; };
-    class KRa_TosServer { dir = "@KRa_TosServer"; name = "Uness Server"; };
+    class MusicRadio { dir = "@MusicRadioCore";       name = "MusicRadio"; };
+    class MusicRadioServer { dir = "@MusicRadioServer"; name = "MusicRadio Server"; };
 };
 ```
 
@@ -97,18 +97,18 @@ class Mods
 * Внешняя музыка кладется в `<profile>/Music/` — пересборка PBO **не требуется**;
   сервер сканирует папки при старте и рассылает клиентам манифест.
 * Для докачки треков клиентами запустите `tools/serve_music.py` и пропишите
-  `UE_Config::libraryBaseURL`.
+  `MR_Config::libraryBaseURL`.
 
 ## 🎮 Игрок
 
 | Предмет | Действие |
 |---|---|
-| `UE_CassettePlayer` + `UE_Item_Cassette_*` | экшен «Включить музыку (кассета)» |
-| `UE_DiskPlayer` + `UE_Item_Disk_*` | экшен «Включить музыку (диск)» |
-| `UE_RadioReceiver` | «Настроить: Апекс/Европа+/Юмор FM», «Выключить радио» |
-| Машина с флагом `ueCarRadio=1` | «Включить/выключить музыку в машине» |
+| `MR_CassettePlayer` + `MR_Item_Cassette_*` | экшен «Включить музыку (кассета)» |
+| `MR_DiskPlayer` + `MR_Item_Disk_*` | экшен «Включить музыку (диск)» |
+| `MR_RadioReceiver` | «Настроить: Апекс/Европа+/Юмор FM», «Выключить радио» |
+| Машина с флагом `mrCarRadio=1` | «Включить/выключить музыку в машине» |
 
-Команды идут через RPC → **серверная валидация** (`UE_Security`: живость,
+Команды идут через RPC → **серверная валидация** (`MR_Security`: живость,
 дистанция, доступ к объекту, rate-limit, белый список станций/плейлистов) →
 рассылка всем игрокам в радиусе слышимости.
 
@@ -116,15 +116,15 @@ class Mods
 
 Мод не работает на сторонних серверах — двухуровневая защита:
 
-* **Уровень 1 (config):** `Uness_Data` и `Uness_Scripts` объявляют
-  `requiredAddons[] = {..., "KRa_TosServerInit"}` — без @KRa_TosServer клиентский
+* **Уровень 1 (config):** `MusicRadioCore` и `MusicRadioScripts` объявляют
+  `requiredAddons[] = {..., "MusicRadioServerInit"}` — без @MusicRadioServer клиентский
   мод не загружается движком, миссия не стартует;
-* **Уровень 2 (script handshake):** `UE_GuardServer.c` (@KRa_TosServer) при старте
-  рассылает клиентам контрольную строку `UNESSED-HS-V1-KRaTos`; `UE_Guard.c`
-  (@Uness) ждёт её в течение grace-периода (`UE_Config::ueGraceSeconds`, по умолчанию 30 с).
+* **Уровень 2 (script handshake):** `MR_GuardServer.c` (@MusicRadioServer) при старте
+  рассылает клиентам контрольную строку `UNESSED-HS-V1-KRaTos`; `MR_Guard.c`
+  (@MusicRadioCore) ждёт её в течение grace-периода (`MR_Config::mrGraceSeconds`, по умолчанию 30 с).
   Если приветствия нет (серверный мод удалён/подменён) — **аварийная остановка
   сервера** (TriggerShutdown + Error в RPT);
-* `CfgRemoteExec` — allow-list только наших RPC-функций (включая `F_UE_Guard_Handshake`);
+* `CfgRemoteExec` — allow-list только наших RPC-функций (включая `F_MR_Guard_Handshake`);
 * сервер проверяет существование плейлиста на диске и станции в белом списке;
 * анти-спам и лимит активных источников;
 * подписи PBO обязательны (`verifySignatures = 1`).

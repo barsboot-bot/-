@@ -12,19 +12,19 @@ Windows и DayZ Tools — они расписаны по кнопкам.
 |-----|-----|--------|
 | Геометрия в метрах, с именованными селекшенами | `Models/src/*.obj` + `*.mtl` | готово |
 | Текстуры: цвет / нормали / блики | `Models/tex_src/*.png` (45 шт., 15 материалов) | готово |
-| Обложки альбомов `rock / pop / classic / dance` | `Models/tex_src/ue_cassette_<album>_*`, `ue_minidisc_<album>_*` | готово |
-| Материалы `.rvmat` | `@Uness/Addons/Uness_Data/data/tex/` (15 шт.) | готово |
-| Классы предметов, пути к моделям, подмена материала | `@Uness/Addons/Uness_Data/config.cpp` | готово |
+| Обложки альбомов `rock / pop / classic / dance` | `Models/tex_src/mr_cassette_<album>_*`, `mr_minidisc_<album>_*` | готово |
+| Материалы `.rvmat` | `@MusicRadioCore/Addons/MusicRadioCore/data/tex/` (15 шт.) | готово |
+| Классы предметов, пути к моделям, подмена материала | `@MusicRadioCore/Addons/MusicRadioCore/config.cpp` | готово |
 | Чертёж с размерами | `Models/preview/*_draft.svg` | готово |
 | Контрольный рендер (проверить глазами до сборки) | `Models/preview/render_*.png`, `textures_sheet.png` | готово |
-| Готовый архив для Windows | `release/Uness_assets_v1.0.0.zip` | готово |
-| **`.p3d`** (модели) | `@Uness/Addons/Uness_Data/data/` | **только вы, Object Builder** |
-| **`.paa`** (текстуры) | `@Uness/Addons/Uness_Data/data/tex/` | **только вы, TexView 2** |
+| Готовый архив для Windows | `release/MusicRadio_assets_v1.1.0.zip` | готово |
+| **`.p3d`** (модели) | `@MusicRadioCore/Addons/MusicRadioCore/data/` | **только вы, Object Builder** |
+| **`.paa`** (текстуры) | `@MusicRadioCore/Addons/MusicRadioCore/data/tex/` | **только вы, TexView 2** |
 
 Габариты, селекшены и материалы — `Models/README.md`.
 
 Если не хочется собирать папки руками, возьмите готовый архив
-`release/Uness_assets_v1.0.0.zip`: там те же исходники, разложенные по
+`release/MusicRadio_assets_v1.1.0.zip`: там те же исходники, разложенные по
 шагам (`1_MODELS`, `2_TEXTURES`, `3_MATERIALS`, `4_PREVIEW`, `5_IN_GAME`),
 `README_RU.txt` с коротким порядком и `REBUILD_ASSETS.bat` для пересборки
 исходников на Windows. Имена папок в архиве — латиницей, чтобы проводник
@@ -53,14 +53,14 @@ Windows не показывал кракозябры; русский текст 
 неудобно.
 
 1. Откройте **TexView 2**, `File → Open…`, выберите
-   `Models\tex_src\ue_cassette_co.png`. Картинка должна открыться.
+   `Models\tex_src\mr_cassette_co.png`. Картинка должна открыться.
    * Если «Error loading file» — проверьте, что файл не палитровый:
-     `python -c "from PIL import Image; print(Image.open(r'Models\tex_src\ue_cassette_co.png').mode)"`
+     `python -c "from PIL import Image; print(Image.open(r'Models\tex_src\mr_cassette_co.png').mode)"`
      должно быть `RGB`.
 2. `File → Save As…`.
    * Тип файла: **PaC (DirectX)** — это и есть `.paa`;
-   * Имя: **сохраняем суффикс**: `ue_cassette_co.paa`;
-   * Папка: `@Uness\Addons\Uness_Data\data\tex\`.
+   * Имя: **сохраняем суффикс**: `mr_cassette_co.paa`;
+   * Папка: `@MusicRadioCore\Addons\MusicRadioCore\data\tex\`.
 3. В диалоге сжатия:
 
    | Карта | Формат | Почему |
@@ -74,7 +74,7 @@ Windows не показывал кракозябры; русский текст 
    режима (`File → Batch Convert…`): сначала все `*_co`, потом `*_nohq`,
    потом `*_smdi`.
 
-**Проверка.** В `@Uness\Addons\Uness_Data\data\tex\` должно быть
+**Проверка.** В `@MusicRadioCore\Addons\MusicRadioCore\data\tex\` должно быть
 45 файлов `.paa` + 15 файлов `.rvmat` и **ни одного `.png`**. PNG в пак не
 кладём: движок их не читает, а вес растёт.
 
@@ -82,25 +82,25 @@ Windows не показывал кракозябры; русский текст 
 
 ## 3. Шаг 2. Модели: `.obj` → `.p3d` (Object Builder)
 
-Для каждого из трёх файлов (`ue_cassette`, `ue_minidisc`, `ue_memorycard`):
+Для каждого из трёх файлов (`mr_cassette`, `mr_minidisc`, `mr_memorycard`):
 
-1. `File → Import → Wavefront (.obj)` → выбрать `Models\src\ue_cassette.obj`.
+1. `File → Import → Wavefront (.obj)` → выбрать `Models\src\mr_cassette.obj`.
 2. **Масштаб 1.0.** В файлах уже метры, Object Builder тоже работает в метрах.
    Масштаб 0.001 = предмет размером с пылинку (самая частая ошибка).
 3. Проверьте габарит: `Structure → Bounding Center` / размеры должны совпасть
-   с `Models\preview\ue_cassette_draft.svg` (100.0 × 63.8 × 12.0 мм).
+   с `Models\preview\mr_cassette_draft.svg` (100.0 × 63.8 × 12.0 мм).
 4. Назначьте материалы. Имена материалов уже приехали из `.mtl`
-   (`ue_cassette`, `ue_plastic`, …). В свойствах текстуры укажите
+   (`mr_cassette`, `mr_plastic`, …). В свойствах текстуры укажите
    **`*.rvmat`**, а не `.paa` — тогда нормали и блики подхватятся сами:
 
    | Имя материала | Файл |
    |---------------|------|
-   | `ue_cassette` | `Uness_Data\data\tex\ue_cassette.rvmat` |
-   | `ue_plastic` | `Uness_Data\data\tex\ue_plastic.rvmat` |
-   | `ue_minidisc` | `Uness_Data\data\tex\ue_minidisc.rvmat` |
-   | `ue_metal` | `Uness_Data\data\tex\ue_metal.rvmat` |
-   | `ue_disc` | `Uness_Data\data\tex\ue_disc.rvmat` |
-   | `ue_memorycard` | `Uness_Data\data\tex\ue_memorycard.rvmat` |
+   | `mr_cassette` | `MusicRadioCore\data\tex\mr_cassette.rvmat` |
+   | `mr_plastic` | `MusicRadioCore\data\tex\mr_plastic.rvmat` |
+   | `mr_minidisc` | `MusicRadioCore\data\tex\mr_minidisc.rvmat` |
+   | `mr_metal` | `MusicRadioCore\data\tex\mr_metal.rvmat` |
+   | `mr_disc` | `MusicRadioCore\data\tex\mr_disc.rvmat` |
+   | `mr_memorycard` | `MusicRadioCore\data\tex\mr_memorycard.rvmat` |
 
 5. Соберите LOD-схему (минимум, чтобы предмет жил в игре):
 
@@ -114,7 +114,7 @@ Windows не показывал кракозябры; русский текст 
 
    Для носителей анимация не нужна, поэтому Memory-LOD достаточно из одной
    точки `ce_center`.
-6. `File → Save As` → `@Uness\Addons\Uness_Data\data\ue_cassette.p3d`
+6. `File → Save As` → `@MusicRadioCore\Addons\MusicRadioCore\data\mr_cassette.p3d`
    (имя — ровно как в `config.cpp`).
 
 **Иконка инвентаря** — здесь же: `Export → Icon`, когда модель сохранена.
@@ -128,16 +128,16 @@ Windows не показывал кракозябры; русский текст 
 powershell -ExecutionPolicy Bypass -File build.ps1
 ```
 
-`build.ps1` сам копирует `@Uness\Addons\*` в staging и собирает PBO
+`build.ps1` сам копирует `@MusicRadioCore\Addons\*` в staging и собирает PBO
 (Addon Builder, либо `tools/pack_pbo.py`, если Tools не установлены).
 Папка `data\` уже внутри аддона — отдельно её нигде подключать не нужно.
 
 В игре (админ-спавн):
 
 ```
-#spawnitem UE_Item_Cassette_Rock
-#spawnitem UE_Item_MiniDisc_Classic
-#spawnitem UE_Item_MemoryCard
+#spawnitem MR_Item_Cassette_Rock
+#spawnitem MR_Item_MiniDisc_Classic
+#spawnitem MR_Item_MemoryCard
 ```
 
 Что должно быть:
@@ -145,7 +145,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 | Предмет | Ожидание |
 |---------|----------|
 | кассета | модель кассеты, на этикетке «РОК-ХИТЫ 80-Х» |
-| `UE_Item_MiniDisc_*` | картридж MD, в окошке диск, сверху металлическая шторка |
+| `MR_Item_MiniDisc_*` | картридж MD, в окошке диск, сверху металлическая шторка |
 | карта памяти | SD-карта с наклейкой «8 GB», на обороте золотые контакты |
 
 ---
@@ -165,7 +165,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1
    ```
 
 3. Сконвертируйте новые PNG в `.paa` (шаг 2).
-4. Добавьте класс в `config.cpp` — по образцу `UE_Item_MiniDisc_Rock`:
+4. Добавьте класс в `config.cpp` — по образцу `MR_Item_MiniDisc_Rock`:
    `uePlaylist` = имя папки в `Music/`, `hiddenSelectionsMaterials[]` =
    свой `.rvmat`.
 
@@ -176,9 +176,9 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 
 ## 6. Чек-лист
 
-- [ ] PNG сконвертированы в `.paa` (45 шт.) и лежат в `Uness_Data\data\tex\`
+- [ ] PNG сконвертированы в `.paa` (45 шт.) и лежат в `MusicRadioCore\data\tex\`
 - [ ] в `data\tex\` нет ни одного `.png`
-- [ ] три `.p3d` сохранены в `Uness_Data\data\` с именами из `config.cpp`
+- [ ] три `.p3d` сохранены в `MusicRadioCore\data\` с именами из `config.cpp`
 - [ ] у каждой модели есть LOD 0.000, Geometry, View Geometry, Memory
 - [ ] материалы в `.p3d` — ссылки на `.rvmat`, а не на `.paa`
 - [ ] импорт был с масштабом 1.0, габарит совпал с чертежом

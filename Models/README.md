@@ -1,6 +1,6 @@
 # Ассеты носителей: кассета, MD-диск, карта памяти
 
-Три модели-носителя для мода «унесённые» (Uness). Геометрия и текстуры
+Три модели-носителя для мода MusicRadio (MusicRadio). Геометрия и текстуры
 **сгенерированы кодом** (`tools/make_models.py`, `tools/make_textures.py`) —
 никаких скачанных картинок, всё воспроизводимо и с чистой лицензией.
 
@@ -12,7 +12,7 @@ Models/
 ```
 
 Материалы (`*.rvmat`) лежат не здесь, а в паке:
-`@Uness/Addons/Uness_Data/data/tex/` (генерирует `tools/make_rvmat.py`).
+`@MusicRadioCore/Addons/MusicRadioCore/data/tex/` (генерирует `tools/make_rvmat.py`).
 
 ---
 
@@ -22,9 +22,9 @@ Models/
 
 | Файл | Прототип | Габарит, мм | Вес в конфиге | Слоты инвентаря |
 |------|----------|-------------|---------------|-----------------|
-| `ue_cassette.obj` | компакт-кассета IEC I | 100.0 × 63.8 × 12.0 | 40 г | 2 × 2 |
-| `ue_minidisc.obj` | MiniDisc (Sony MDW-74) | 68.0 × 72.0 × 5.0 | 30 г | 1 × 2 |
-| `ue_memorycard.obj` | SD-карта | 32.0 × 24.0 × 2.1 | 10 г | 1 × 1 |
+| `mr_cassette.obj` | компакт-кассета IEC I | 100.0 × 63.8 × 12.0 | 40 г | 2 × 2 |
+| `mr_minidisc.obj` | MiniDisc (Sony MDW-74) | 68.0 × 72.0 × 5.0 | 30 г | 1 × 2 |
+| `mr_memorycard.obj` | SD-карта | 32.0 × 24.0 × 2.1 | 10 г | 1 × 1 |
 
 ## 2. Система координат и масштаб
 
@@ -41,33 +41,33 @@ Models/
 Группы в `.obj` (`g <имя>`) — это будущие named selections в `.p3d`. По ним
 назначаются материалы и, если понадобится, делается анимация.
 
-### `ue_cassette`
+### `mr_cassette`
 | Группа | Что это | Материал |
 |--------|---------|----------|
-| `shell` | корпус с фасками, верх с вырезом под окно, низ, боковины | `ue_cassette` |
-| `cavity` | внутренняя полость окна: пол + 4 стенки | `ue_cassette` |
-| `window` | стёкла окна (рамка по периметру, середина открыта) | `ue_cassette` |
-| `label` | бумажная этикетка (+0.2 мм над корпусом) | `ue_cassette` |
-| `tape_left` / `tape_right` | рулоны плёнки (левый полный, правый наполовину смотан) | `ue_cassette` |
-| `hub_left` / `hub_right` | зубчатые ступицы катушек | `ue_plastic` |
+| `shell` | корпус с фасками, верх с вырезом под окно, низ, боковины | `mr_cassette` |
+| `cavity` | внутренняя полость окна: пол + 4 стенки | `mr_cassette` |
+| `window` | стёкла окна (рамка по периметру, середина открыта) | `mr_cassette` |
+| `label` | бумажная этикетка (+0.2 мм над корпусом) | `mr_cassette` |
+| `tape_left` / `tape_right` | рулоны плёнки (левый полный, правый наполовину смотан) | `mr_cassette` |
+| `hub_left` / `hub_right` | зубчатые ступицы катушек | `mr_plastic` |
 
-### `ue_minidisc`
+### `mr_minidisc`
 | Группа | Что это | Материал |
 |--------|---------|----------|
-| `shell` | корпус со срезанным углом | `ue_minidisc` |
-| `cavity` | полость окна чтения/записи | `ue_plastic` |
-| `shutter` | металлическая сдвижная шторка | `ue_metal` |
-| `disc` | диск, видимый в окне | `ue_disc` |
-| `hub` | ступица диска | `ue_metal` |
-| `label` | этикетка | `ue_minidisc` |
+| `shell` | корпус со срезанным углом | `mr_minidisc` |
+| `cavity` | полость окна чтения/записи | `mr_plastic` |
+| `shutter` | металлическая сдвижная шторка | `mr_metal` |
+| `disc` | диск, видимый в окне | `mr_disc` |
+| `hub` | ступица диска | `mr_metal` |
+| `label` | этикетка | `mr_minidisc` |
 
-### `ue_memorycard`
+### `mr_memorycard`
 | Группа | Что это | Материал |
 |--------|---------|----------|
-| `shell` | корпус со срезанным углом | `ue_memorycard` |
-| `label` | наклейка с маркировкой | `ue_memorycard` |
-| `contacts` | контактная площадка (9 позолоченных дорожек) | `ue_memorycard` |
-| `switch` | переключатель защиты от записи | `ue_plastic` |
+| `shell` | корпус со срезанным углом | `mr_memorycard` |
+| `label` | наклейка с маркировкой | `mr_memorycard` |
+| `contacts` | контактная площадка (9 позолоченных дорожек) | `mr_memorycard` |
+| `switch` | переключатель защиты от записи | `mr_plastic` |
 
 Селекшен **`label`** — служебный: именно он перечислен в `hiddenSelections[]`
 в `config.cpp`, поэтому обложка альбома подменяется материалом, а не моделью.
@@ -77,20 +77,20 @@ Models/
 
 Схема DayZ: три карты на материал — `_co` (цвет), `_nohq` (нормали, +Y вверх),
 `_smdi` (блики). Разметка (какая грань в каком прямоугольнике лежит) — одна на
-все скрипты и живёт в `tools/ue_asset_lib.py`.
+все скрипты и живёт в `tools/mr_asset_lib.py`.
 
 | Материал | Размер | Что нарисовано |
 |----------|--------|----------------|
-| `ue_cassette` | 1024×512 | лицо (этикетка, SIDE A, окно), оборот (SIDE B, шпиндели), торцы, плёнка |
-| `ue_minidisc` | 1024×512 | сторона шторки, сторона этикетки, торцы |
-| `ue_memorycard` | 256×256 | наклейка «8 GB», контактная площадка, торцы |
-| `ue_plastic` | 256×256 | тайловый пластик (катушки, корпус карты) |
-| `ue_metal` | 256×256 | шлифованный металл (шторка MD) |
-| `ue_paper` | 256×256 | бумага (задел под этикетки) |
-| `ue_disc` | 256×256 | диск MD: радужные концентрические кольца |
+| `mr_cassette` | 1024×512 | лицо (этикетка, SIDE A, окно), оборот (SIDE B, шпиндели), торцы, плёнка |
+| `mr_minidisc` | 1024×512 | сторона шторки, сторона этикетки, торцы |
+| `mr_memorycard` | 256×256 | наклейка «8 GB», контактная площадка, торцы |
+| `mr_plastic` | 256×256 | тайловый пластик (катушки, корпус карты) |
+| `mr_metal` | 256×256 | шлифованный металл (шторка MD) |
+| `mr_paper` | 256×256 | бумага (задел под этикетки) |
+| `mr_disc` | 256×256 | диск MD: радужные концентрические кольца |
 
 Плюс **обложки альбомов**: на каждый плейлист (`rock`, `pop`, `classic`,
-`dance`) свой комплект `ue_cassette_<album>_*` и `ue_minidisc_<album>_*` —
+`dance`) свой комплект `mr_cassette_<album>_*` и `mr_minidisc_<album>_*` —
 название альбома напечатано прямо на этикетке, цвет полосы у каждого свой.
 
 Всего: 45 PNG (15 материалов × 3 карты), ~1.7 МБ. PNG в PBO **не идут** —
@@ -101,10 +101,10 @@ Models/
 ```bash
 python3 tools/make_models.py        # Models/src/*.obj + *.mtl, чертежи SVG
 python3 tools/make_textures.py      # Models/tex_src/*.png + контактный лист
-python3 tools/make_rvmat.py         # @Uness/Addons/Uness_Data/data/tex/*.rvmat
+python3 tools/make_rvmat.py         # @MusicRadioCore/Addons/MusicRadioCore/data/tex/*.rvmat
 python3 tools/render_preview.py     # Models/preview/render_*.png (контроль глазами)
 python3 tools/check_assets.py       # проверка: геометрия/текстуры/rvmat/config
-python3 tools/make_assets_zip.py    # release/Uness_assets_v1.0.0.zip (раздаточный архив)
+python3 tools/make_assets_zip.py    # release/MusicRadio_assets_v1.1.0.zip (раздаточный архив)
 ```
 
 Частичный запуск: `--only cassette`, `--base` / `--albums`, `--dry-run`.

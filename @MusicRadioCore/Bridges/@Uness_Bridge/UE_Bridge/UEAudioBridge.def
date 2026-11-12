@@ -1,0 +1,20 @@
+; ============================================================
+;  UEAudioBridge.def — список экспортов аудио-прослойки
+;  (используется build_msvc.bat, чтобы не терять WINAPI-имена)
+; ============================================================
+LIBRARY UEAudioBridge
+EXPORTS
+    MR_Initialize
+    MR_Shutdown
+    MR_GetVersion
+    MR_GetLastError
+    MR_PlayFile
+    MR_PlayStream
+    MR_Stop
+    MR_SetVolume
+    MR_SetPosition
+    MR_Pause
+    MR_GetState
+    MR_IsStreamConnected
+    MR_SetListenerPosition
+    MR_SelfTest
