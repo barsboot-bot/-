@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Uness — лут для носителей музыки (кассета, MiniDisc, карта памяти).
+
+  Это НЕ готовый types.xml миссии, а сниппет: скопируйте блоки <type> внутрь
+  <types>...</types> своего файла types.xml (обычно это
+  serverDZ\mpmissions\dayzOffline.chernarusplus\db\types.xml).
+
+  Если ваш лаунчер умеет несколько файлов типов — можно положить этот файл
+  рядом с types.xml целиком.
+
+  Без записи в types предмет НИКОГДА не заспавнится: админ-спавн
+  (#spawnitem ...) работает и без неё, а вот лут в мире — нет.
+  Значения nominal/min — ориентир для карты размером с Chernarus; на маленьких
+  картах уменьшайте пропорционально.
+-->
+<types>
+    <!-- карта памяти: расходник, должен попадаться часто -->
+    <type name="UE_Item_MemoryCard">
+        <nominal>25</nominal>
+        <lifetime>14400</lifetime>
+        <restock>600</restock>
+        <min>8</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Village"/>
+        <usage name="Office"/>
+        <usage name="School"/>
+        <value name="Tier1"/>
+        <value name="Tier2"/>
+    </type>
+
+    <!-- аудиокассеты -->
+    <type name="UE_Item_Cassette_Rock">
+        <nominal>6</nominal>
+        <lifetime>28800</lifetime>
+        <restock>1200</restock>
+        <min>2</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Village"/>
+        <usage name="Office"/>
+        <usage name="School"/>
+        <value name="Tier1"/>
+        <value name="Tier2"/>
+    </type>
+    <type name="UE_Item_Cassette_Pop">
+        <nominal>5</nominal>
+        <lifetime>28800</lifetime>
+        <restock>1200</restock>
+        <min>2</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Village"/>
+        <value name="Tier1"/>
+        <value name="Tier2"/>
+    </type>
+
+    <!-- MiniDisc: редкий и «продвинутый» носитель -->
+    <type name="UE_Item_MiniDisc_Rock">
+        <nominal>4</nominal>
+        <lifetime>28800</lifetime>
+        <restock>1200</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Office"/>
+        <value name="Tier2"/>
+        <value name="Tier3"/>
+    </type>
+    <type name="UE_Item_MiniDisc_Pop">
+        <nominal>4</nominal>
+        <lifetime>28800</lifetime>
+        <restock>1200</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Office"/>
+        <value name="Tier2"/>
+        <value name="Tier3"/>
+    </type>
+    <type name="UE_Item_MiniDisc_Classic">
+        <nominal>3</nominal>
+        <lifetime>28800</lifetime>
+        <restock>1200</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Office"/>
+        <usage name="School"/>
+        <value name="Tier2"/>
+        <value name="Tier3"/>
+    </type>
+    <type name="UE_Item_MiniDisc_Dance">
+        <nominal>3</nominal>
+        <lifetime>28800</lifetime>
+        <restock>1200</restock>
+        <min>1</min>
+        <quantmin>-1</quantmin>
+        <quantmax>-1</quantmax>
+        <cost>100</cost>
+        <flags count_in_cargo="0" count_in_hoarder="0" count_in_map="1" count_in_player="0" crafted="0" deloot="0"/>
+        <category name="tools"/>
+        <tag name="shelves"/>
+        <usage name="Town"/>
+        <usage name="Office"/>
+        <value name="Tier3"/>
+    </type>
+</types>

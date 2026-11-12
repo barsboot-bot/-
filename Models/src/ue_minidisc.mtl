@@ -1,0 +1,34 @@
+# материалы модели ue_minidisc
+# имя материала = имя .rvmat, который надо назначить в Object Builder
+
+newmtl ue_disc
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.150 0.150 0.150
+Ns 30.0
+map_Kd ../../Models/tex_src/ue_disc_co.png
+# текстура ue_disc_co.png: 256x256 px, в игру идёт .paa (TexView 2)
+
+newmtl ue_metal
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.150 0.150 0.150
+Ns 30.0
+map_Kd ../../Models/tex_src/ue_metal_co.png
+# текстура ue_metal_co.png: 256x256 px, в игру идёт .paa (TexView 2)
+
+newmtl ue_minidisc
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.150 0.150 0.150
+Ns 30.0
+map_Kd ../../Models/tex_src/ue_minidisc_co.png
+# текстура ue_minidisc_co.png: 1024x512 px, в игру идёт .paa (TexView 2)
+
+newmtl ue_plastic
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.150 0.150 0.150
+Ns 30.0
+map_Kd ../../Models/tex_src/ue_plastic_co.png
+# текстура ue_plastic_co.png: 256x256 px, в игру идёт .paa (TexView 2)

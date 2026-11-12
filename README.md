@@ -36,6 +36,10 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 │   ├── Bridges/@Uness_Bridge/              # нативный BASS-мост (опционально)
 │   ├── Keys/uness.bikey                      # публичный ключ подписи
 │   └── config.cpp                              # корневой cfgMods/CfgBridges
+├── Models/                  # АССЕТЫ (исходники моделей и текстур)
+│   ├── src/*.obj *.mtl      # геометрия в метрах, с именованными селекшенами
+│   ├── tex_src/*.png        # _co / _nohq / _smdi + обложки альбомов
+│   └── preview/             # чертежи SVG, контактный лист, рендеры
 ├── @KRa_TosServer/            # СЕРВЕРНАЯ часть
 │   ├── Addons/KRa_TosServerInit/            # CfgRemoteExec allow-list + UE_GuardServer.c (handshake)
 │   ├── Music/                                  # внешняя библиотека (без PBO!)
@@ -46,6 +50,28 @@ Enforce Script модули `3_Game / 4_World / 5_Mission`).
 ├── tools/pack_pbo.py            # fallback-упаковщик PBO (без DayZ Tools)
 └── build.ps1                    # сборочный скрипт (Addon Builder → pack_pbo)
 ```
+
+## 🎨 Ассеты носителей
+
+Свои модели и текстуры кассеты, MiniDisc и карты памяти — в каталоге `Models/`.
+Всё генерируется скриптами (чистая лицензия, воспроизводимый результат):
+
+| Модель | Габарит | Класс предмета |
+|--------|---------|----------------|
+| `ue_cassette.p3d` | 100.0 × 63.8 × 12.0 мм | `UE_Item_Cassette_Rock`, `UE_Item_Cassette_Pop` |
+| `ue_minidisc.p3d` | 68.0 × 72.0 × 5.0 мм | `UE_Item_MiniDisc_Rock` / `_Pop` / `_Classic` / `_Dance` |
+| `ue_memorycard.p3d` | 32.0 × 24.0 × 2.1 мм | `UE_Item_MemoryCard` |
+
+```bash
+python3 tools/make_models.py      # .obj + .mtl + чертежи SVG
+python3 tools/make_textures.py    # .png (_co/_nohq/_smdi) + обложки альбомов
+python3 tools/make_rvmat.py       # .rvmat в @Uness/Addons/Uness_Data/data/tex/
+python3 tools/render_preview.py   # превью-рендер для проверки глазами
+```
+
+Два шага остаются за вами — они требуют Windows и DayZ Tools:
+`.obj → .p3d` (Object Builder) и `.png → .paa` (TexView 2). Пошагово —
+**`docs/17_ASSETS.md`**, габариты и селекшены — `Models/README.md`.
 
 ## 🛠 Сборка (по BI-гайду)
 

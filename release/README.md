@@ -44,3 +44,23 @@ release/
 PBO упакованы тестовым паковщиком и **не подписаны**. Для продакшена пересоберите
 и подпишите официальным **Addon Builder (DayZ Tools)** тем же ключом, что `uness.bikey`,
 либо запустите на сервере параметр `-skipAssestSignatureCheck` только для локального теста.
+
+---
+
+## 🎨 Архив ассетов
+
+`Uness_assets_v1.0.0.zip` — исходники моделей и текстур носителей
+(кассета, MiniDisc, карта памяти) для работы на машине с DayZ Tools:
+
+```
+1_MODELS/      .obj + .mtl  (→ Object Builder, масштаб 1.0)
+2_TEXTURES/    45 PNG: _co / _nohq / _smdi (→ TexView 2)
+3_MATERIALS/   15 .rvmat (→ @Uness\Addons\Uness_Data\data\tex\)
+4_PREVIEW/     чертежи SVG, контрольные рендеры, контактный лист
+5_IN_GAME/     config.cpp (образец классов) + лут types
+tools/         генераторы исходников + REBUILD_ASSETS.bat
+```
+
+Что **нельзя** сделать скриптом: `.p3d` и `.paa` — бинарные форматы Bohemia,
+их пишут только Object Builder и TexView 2. Порядок — `docs/17_ASSETS.md`
+в репозитории (и `docs/17_ASSETS.md` внутри архива).

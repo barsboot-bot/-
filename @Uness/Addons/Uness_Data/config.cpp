@@ -20,7 +20,11 @@ class CfgPatches
         // а по истечении ueGraceSeconds сервер аварийно останавливается
         // (см. scripts/5_Mission/UE_Guard.c).
         requiredAddons[] = {"DZ_Data", "DZ_Scripts", "KRa_TosServerInit"};
-        units[] = {"UE_CassettePlayer", "UE_DiskPlayer", "UE_RadioReceiver", "UE_CarRadioUnit"};
+        units[] = {"UE_CassettePlayer", "UE_DiskPlayer", "UE_RadioReceiver", "UE_CarRadioUnit",
+                   "UE_Item_Cassette_Rock", "UE_Item_Cassette_Pop",
+                   "UE_Item_MiniDisc_Rock", "UE_Item_MiniDisc_Pop",
+                   "UE_Item_MiniDisc_Classic", "UE_Item_MiniDisc_Dance",
+                   "UE_Item_MemoryCard"};
         weapons[] = {};
     };
 };
@@ -124,31 +128,148 @@ class CfgVehicles
         itemSize[] = {5, 3};
     };
 
-    // ---------- Носители (расходники) ----------
-    class UE_Item_Cassette_Rock: ItemBase
+    // ==================================================================
+    //  Носители музыки.
+    //  Правило мода: один носитель = один плейлист, внутри предмета звука
+    //  нет — треки лежат во внешней библиотеке Music/ (Music/Type/<плейлист>
+    //  для кассет, Music/CD/<плейлист> для дисков) и подтягиваются по ключу
+    //  `uePlaylist`. Поэтому новый альбом = новый класс + обложка, без
+    //  пересборки аудио.
+    //
+    //  Модели:  Models/src/*.obj -> .p3d (Object Builder), габариты и
+    //           имена селекшенов — Models/README.md, порядок — docs/17_ASSETS.md
+    //  Текстуры: Models/tex_src/*.png -> .paa (TexView 2)
+    //  Материалы: Uness_Data\data\tex\*.rvmat (назначаются в Object Builder)
+    // ==================================================================
+    class UE_Item_Carrier_Base: ItemBase
+    {
+        scope = 0;                      // базовый класс: в игре не появляется
+        displayName = "Носитель";
+        descriptionShort = "Носитель музыки. Вставьте в плеер.";
+        weight = 40;
+        itemSize[] = {2, 2};
+        // `label` — имя селекшена на модели (этикетка). Материал подменяется
+        // из конфига альбома: меш один и тот же, обложка — у каждого своя.
+        hiddenSelections[] = {"label"};
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_cassette.rvmat"};
+    };
+
+    // ---------------------- аудиокассета ----------------------
+    class UE_Item_Cassette_Base: UE_Item_Carrier_Base
+    {
+        scope = 0;
+        displayName = "Аудиокассета";
+        model = "Uness_Data\data\ue_cassette.p3d";   // 100 x 63.8 x 12 мм
+        weight = 40;                    // грамм (реальная кассета ~40 г)
+        itemSize[] = {2, 2};
+    };
+
+    class UE_Item_Cassette_Rock: UE_Item_Cassette_Base
     {
         scope = 2;
         displayName = "Кассета: Рок-хиты 80-х";
-        descriptionShort = "Аудиокассета с записью рок-композиций.";
-        model = "\dz\items\magazine_rifle_556.p3d";
-        weight = 100;
-        itemSize[] = {4, 2};
+        descriptionShort = "Аудиокассета TYPE I, сторона A. Вставьте в кассетный плеер.";
+        uePlaylist = "Rock";            // -> Music/Type/Rock на сервере
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_cassette_rock.rvmat"};
     };
 
     class UE_Item_Cassette_Pop: UE_Item_Cassette_Rock
     {
         displayName = "Кассета: Поп-музыка";
+        descriptionShort = "Аудиокассета TYPE I, сторона A. Вставьте в кассетный плеер.";
+        uePlaylist = "Pop";
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_cassette_pop.rvmat"};
     };
 
-    class UE_Item_Disk_Classic: UE_Item_Cassette_Rock
+    // ---------------------- MiniDisc ----------------------
+    class UE_Item_MiniDisc_Base: UE_Item_Carrier_Base
     {
+        scope = 0;
+        displayName = "MiniDisc";
+        model = "Uness_Data\data\ue_minidisc.p3d";   // 68 x 72 x 5 мм
+        weight = 30;
+        itemSize[] = {1, 2};
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_minidisc.rvmat"};
+    };
+
+    class UE_Item_MiniDisc_Rock: UE_Item_MiniDisc_Base
+    {
+        scope = 2;
+        displayName = "MD: Рок-хиты 80-х";
+        descriptionShort = "Перезаписываемый MiniDisc на 74 минуты.";
+        uePlaylist = "Rock";
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_minidisc_rock.rvmat"};
+    };
+
+    class UE_Item_MiniDisc_Pop: UE_Item_MiniDisc_Base
+    {
+        scope = 2;
+        displayName = "MD: Поп-музыка";
+        descriptionShort = "Перезаписываемый MiniDisc на 74 минуты.";
+        uePlaylist = "Pop";
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_minidisc_pop.rvmat"};
+    };
+
+    class UE_Item_MiniDisc_Classic: UE_Item_MiniDisc_Base
+    {
+        scope = 2;
+        displayName = "MD: Классика рока";
+        descriptionShort = "Перезаписываемый MiniDisc на 74 минуты.";
+        uePlaylist = "Classic";         // -> Music/CD/Classic
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_minidisc_classic.rvmat"};
+    };
+
+    class UE_Item_MiniDisc_Dance: UE_Item_MiniDisc_Base
+    {
+        scope = 2;
+        displayName = "MD: Танцевальный микс";
+        descriptionShort = "Перезаписываемый MiniDisc на 74 минуты.";
+        uePlaylist = "Dance";
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_minidisc_dance.rvmat"};
+    };
+
+    // ---------------------- компакт-диск ----------------------
+    // Модель диска — отдельная задача: пока используется ванильная заглушка,
+    // геометрия и текстуры делаются ровно так же, как для кассеты и MD.
+    class UE_Item_Disk_Base: UE_Item_Carrier_Base
+    {
+        scope = 0;
+        displayName = "Компакт-диск";
+        model = "\dz\items\magazine_rifle_556.p3d";  // ЗАГЛУШКА до своей модели
+        weight = 15;
+        itemSize[] = {2, 2};
+    };
+
+    class UE_Item_Disk_Classic: UE_Item_Disk_Base
+    {
+        scope = 2;
         displayName = "Диск: Классика рока";
         descriptionShort = "Компакт-диск с коллекцией классических треков.";
+        uePlaylist = "Classic";
     };
 
     class UE_Item_Disk_Dance: UE_Item_Disk_Classic
     {
         displayName = "Диск: Танцевальный микс";
+        uePlaylist = "Dance";
+    };
+
+    // ---------------------- карта памяти ----------------------
+    class UE_Item_MemoryCard_Base: UE_Item_Carrier_Base
+    {
+        scope = 0;
+        displayName = "Карта памяти";
+        model = "Uness_Data\data\ue_memorycard.p3d"; // 32 x 24 x 2.1 мм
+        weight = 10;
+        itemSize[] = {1, 1};
+        hiddenSelectionsMaterials[] = {"Uness_Data\data\tex\ue_memorycard.rvmat"};
+    };
+
+    class UE_Item_MemoryCard: UE_Item_MemoryCard_Base
+    {
+        scope = 2;
+        displayName = "Карта памяти 8 GB";
+        descriptionShort = "SD-карта: ключ плеера. Музыка на ней не хранится, плейлист задаёт вставленный носитель.";
     };
 
     // ---------- Магазин-носитель для плеера ----------
@@ -157,7 +278,7 @@ class CfgVehicles
         scope = 2;
         displayName = "Магазин: Кассета (Рок)";
         descriptionShort = "Кассета, вставленная в плеер.";
-        model = "\dz\items\magazine_rifle_556.p3d";
+        model = "Uness_Data\data\ue_cassette.p3d";
         ammo = "UE_Track_Rock";
         count = 1;
         weight = 100;
